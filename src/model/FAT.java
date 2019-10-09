@@ -51,7 +51,6 @@ public class FAT {
     public byte[][] getTable() {
 		return table;
 	}
-    
     public byte getLocation(byte index) {
     	return this.table[index / 64][index % 64];
     }
