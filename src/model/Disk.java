@@ -3,13 +3,15 @@ package model;
 import java.util.List;
 
 public class Disk {
-	 private static byte[][] storageBlocks = new byte[128][];
+	 private byte[][] storageBlocks = new byte[128][];
 	
 	public Disk() {
 		for (int i = 0; i < 128; i++) {
             storageBlocks[i] = new byte[64];
         }
 	}
+	
+	// TODO load disk from file
 	
 	/**
      * 存储一个完整的块
