@@ -2,8 +2,8 @@ package model;
 
 
 public interface DirItemInterface {
-	public static final byte DIR = 4;
-	public static final byte FILE = 3;
+	public static final byte DIR = 8;
+	public static final byte FILE = 4;
 	public static final byte SYS_FILE = 2;
 	public static final byte READONLY = 1;
 	

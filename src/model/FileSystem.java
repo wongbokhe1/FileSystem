@@ -8,7 +8,7 @@ public class FileSystem implements FileSystemInterface{
 
 	private FAT fat;
 	private Disk disk;
-	private List<DirItem> openedFile = new ArrayList<DirItem>(3);
+	private List<DirItem> openedFile = new ArrayList<DirItem>(5);
 	
 	public FileSystem() {
 		this.fat = new FAT();
@@ -18,6 +18,18 @@ public class FileSystem implements FileSystemInterface{
 	
 	@Override
 	public DirItem createFile(String name, String type, byte attribute, String path) throws Exception{
+		if ((attribute | DirItem.READONLY) == 0) {
+			throw new Exception("不能建立只读文件");
+		}
+		
+//		TODO CHECK path
+		
+//		if() {
+//		TODO CHECK name's uniqueness
+//		throw new Exception("文件已存在")；
+//	}
+		
+		
 		DirItem file = new DirItem();
 		// TODO disk allocation
 		file.setName(name);
@@ -33,6 +45,13 @@ public class FileSystem implements FileSystemInterface{
 
 	@Override
 	public DirItem createDir(String name, byte attribute, String path) throws Exception{
+//		TODO CHECK path
+		
+//		if() {
+//		TODO CHECK name's uniqueness
+//		throw new Exception("文件已存在")；
+//	}
+		
 		DirItem dir = new DirItem();
 		// TODO disk allocation
 		dir.setName(name);
@@ -42,10 +61,79 @@ public class FileSystem implements FileSystemInterface{
 		fat.setTable(blockNum, FAT.USED);
 		return dir;
 	}
+	
+	@Override
+	public DirItem createFile(String name, String type, byte attribute, DirItem paretent) throws Exception{
+		if ((attribute | DirItem.READONLY) == 0) {
+			throw new Exception("不能建立只读文件");
+		}
+		
+//		TODO CHECK path
+		
+		// CHECK name's uniqueness
+		this.checkName(name, paretent);
+		
+		
+		DirItem file = new DirItem();
+		// TODO disk allocation
+		file.setName(name);
+		file.setType(type);
+		file.setAttribute(attribute);
+		file.setSize((byte) 0);
+		file.setPath(paretent.getPath()+"/"+name);
+		byte blockNum = fat.getEmptyLocation();
+		fat.setTable(blockNum, FAT.USED);
+
+		return file;
+	}
+
+	@Override
+	public DirItem createDir(String name, byte attribute, DirItem paretent) throws Exception{
+
+//		TODO CHECK path
+
+		// CHECK name's uniqueness
+		this.checkName(name, paretent);
+		
+		DirItem dir = new DirItem();
+		// TODO disk allocation
+		dir.setName(name);
+		dir.setAttribute(attribute);
+		dir.setPath(paretent.getPath()+"/"+name);
+		byte blockNum = fat.getEmptyLocation();
+		fat.setTable(blockNum, FAT.USED);
+		return dir;
+	}
+	
+	
+	/**
+	 * delete empty directory
+	 */
+	@Override
+	public void deleteDir(DirItem item) throws Exception {
+//		TODO CHECK path
+		
+		// check root directory
+		if(item.getStartBlock() == FileSystemInterface.ROOT) {
+			throw new Exception("该目录为根目录，不能删除");
+		}
+		
+		// check empty directory
+		DirItem[] fileTree = this.getFileTree(item);
+		for (DirItem i: fileTree) {
+			if(!i.isEmpty()) {
+				throw new Exception("该目录不为空目录，不能删除");
+			}
+		}
+		
+		// delete single directory
+		byte startBlock = item.getStartBlock();
+		fat.setTable(startBlock, FAT.EMPTY);
+	}
 
 	@Override
 	public byte[] open(DirItem item, byte mode) throws Exception{
-		for(int i = 0; i<3; i++) {
+		for(int i = 0; i<5; i++) {
 			if(openedFile.get(i) == null) {
 				item.setMode(mode);
 				openedFile.set(i, item); 
@@ -57,7 +145,7 @@ public class FileSystem implements FileSystemInterface{
 					data[idx] = b;
 					idx++;
 				}
-				while(blockNum != fat.getLocation(blockNum)) {
+				while(FAT.USED != fat.getLocation(blockNum)) {
 					block = disk.getBlock(blockNum);
 					for (byte b : block) {
 						data[idx] = b;
@@ -67,7 +155,7 @@ public class FileSystem implements FileSystemInterface{
 				return data;
 			}
 		}
-		throw new Exception("仅容许打开3个文件, 但尝试打开更多文件");
+		throw new Exception("仅容许打开5个文件, 但尝试打开更多文件");
 		
 		
 	}
@@ -75,7 +163,61 @@ public class FileSystem implements FileSystemInterface{
 
 	@Override
 	public void write(DirItem item, byte[] buffer) throws Exception {
-		// TODO Auto-generated method stub
+		// TODO 
+		
+	}
+
+	@Override
+	public byte[] read(DirItem item, byte mode) throws Exception {
+		byte[] data = new byte[item.getSize()];
+		byte blockNum = item.getStartBlock();
+		int idx = 0;
+		byte[] block = disk.getBlock(blockNum);
+		for (byte b : block) {
+			data[idx] = b;
+			idx++;
+		}
+		while(FAT.USED != fat.getLocation(blockNum)) {
+			block = disk.getBlock(blockNum);
+			for (byte b : block) {
+				data[idx] = b;
+				idx++;
+			}
+		}
+		return data;
+	}
+
+	@Override
+	public void delete(DirItem item) throws Exception {
+//		TODO CHECK path
+		
+		if(this.isOpen(item)) {
+			throw new Exception("文件已打开");
+		}
+		
+		//修改FAT，归还磁盘空间
+		byte currentBlock = item.getStartBlock();
+		byte nextBlock = fat.getLocation(currentBlock);
+		while(fat.getLocation(currentBlock) != FAT.USED) {
+			fat.setTable(currentBlock, FAT.EMPTY);
+			currentBlock = nextBlock;
+			nextBlock = fat.getLocation(currentBlock);
+		}
+		
+	}
+
+	@Override
+	public void modify(DirItem item, byte attribute) throws Exception {
+//		if() {
+//		TODO CHECK path
+//			throw new Exception("文件不存在")；
+//		}
+		
+		if(this.isOpen(item)) {
+			throw new Exception("文件已打开");
+		}
+		
+		item.setAttribute(attribute);
 		
 	}
 
@@ -84,7 +226,7 @@ public class FileSystem implements FileSystemInterface{
 		byte[] data = disk.getBlock(FileSystem.ROOT);
 		DirItem[] dirItems = new DirItem[8];
 		for(int i = 0; i<8; i++) {
-			dirItems[i] = new DirItem(Arrays.copyOfRange(data, i, i+7), "/");
+			dirItems[i] = new DirItem(Arrays.copyOfRange(data, i*8, i*8+7), "/");
 		}
 		return dirItems;
 		
@@ -95,7 +237,7 @@ public class FileSystem implements FileSystemInterface{
 		byte[] data = disk.getBlock(item.getStartBlock());
 		DirItem[] dirItems = new DirItem[8];
 		for(int i = 0; i<8; i++) {
-			dirItems[i] = new DirItem(Arrays.copyOfRange(data, i, i+7), item.getPath());
+			dirItems[i] = new DirItem(Arrays.copyOfRange(data, i*8, i*8+7), item.getPath());
 		}
 		return dirItems;
 	}
@@ -103,7 +245,7 @@ public class FileSystem implements FileSystemInterface{
 	@Override
 	public DirItem[] getFileTree(String path) throws Exception {
 		return null;
-		
+		//TODO 
 		
 	}
 
@@ -116,6 +258,7 @@ public class FileSystem implements FileSystemInterface{
 		} else {
 			this.write(item, buffer);
 		}
+		//TODO 判断是否打开->检查打开方式->修改目录项->删除已打开表
 	}
 
 	public FAT getFat() {
@@ -141,6 +284,43 @@ public class FileSystem implements FileSystemInterface{
 	public void setOpenedFile(List<DirItem> openedFile) {
 		this.openedFile = openedFile;
 	}
-
+	
+	/**
+	 * 检查某目录/路径是否存在
+	 * @throws Exception 
+	 */
+	private boolean checkPath(DirItem item) throws Exception {
+		//TODO 
+//		String path = item.getPath();
+//		throw new Exception("目录不存在");
 		
+		return true;
+	}
+	
+	/**
+	 * 检查该目录是否有重名目录/文件
+	 * @throws Exception 
+	 */
+	private void checkName(String name, DirItem item) throws Exception {
+		DirItem[] fileTree = this.getFileTree(item);
+		for(DirItem d: fileTree) {
+			if(name.equalsIgnoreCase(d.getName())) {
+				throw new Exception("已有该目录/文件");
+			}
+		}
+		return;
+	}
+	
+	/**
+	 * 检查文件是否已打开
+	 */
+	private boolean isOpen(DirItem item) {
+		int idx = openedFile.indexOf(item);
+		if(idx != -1) {
+			return true;
+		}else {
+			return false;
+		}
+		
+	}
 }

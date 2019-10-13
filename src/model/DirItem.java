@@ -140,8 +140,19 @@ public class DirItem implements DirItemInterface {
 		this.mode = mode;
 	}
 
+	public byte[] getValues() {
+		return values;
+	}
 
 
+	public boolean isEmpty() {
+		for(byte b:values) {
+			if(b != 0) {
+				return false;
+			}
+		}
+		return true;
+	}
 
 
 }
