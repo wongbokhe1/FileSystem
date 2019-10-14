@@ -3,11 +3,14 @@ package model;
 import java.util.List;
 
 public class Disk {
-	 private byte[][] storageBlocks = new byte[128][];
+	public static final int totalBlock = 128;
+	public static final int blockSize = 64;
+	
+	private byte[][] storageBlocks = new byte[this.totalBlock][];
 	
 	public Disk() {
-		for (int i = 0; i < 128; i++) {
-            storageBlocks[i] = new byte[64];
+		for (int i = 0; i < this.totalBlock; i++) {
+            storageBlocks[i] = new byte[this.blockSize];
         }
 	}
 	

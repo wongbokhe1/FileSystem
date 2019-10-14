@@ -22,12 +22,9 @@ public class FileSystem implements FileSystemInterface{
 			throw new Exception("不能建立只读文件");
 		}
 		
-//		TODO CHECK path
+		this.checkPath(path);
 		
-//		if() {
-//		TODO CHECK name's uniqueness
-//		throw new Exception("文件已存在")；
-//	}
+		this.checkName(name, path);
 		
 		
 		DirItem file = new DirItem();
@@ -45,12 +42,9 @@ public class FileSystem implements FileSystemInterface{
 
 	@Override
 	public DirItem createDir(String name, byte attribute, String path) throws Exception{
-//		TODO CHECK path
+		this.checkPath(path);
 		
-//		if() {
-//		TODO CHECK name's uniqueness
-//		throw new Exception("文件已存在")；
-//	}
+		this.checkName(name, path);
 		
 		DirItem dir = new DirItem();
 		// TODO disk allocation
@@ -68,14 +62,14 @@ public class FileSystem implements FileSystemInterface{
 			throw new Exception("不能建立只读文件");
 		}
 		
-//		TODO CHECK path
+		this.checkPath(paretent);
 		
 		// CHECK name's uniqueness
 		this.checkName(name, paretent);
 		
 		
 		DirItem file = new DirItem();
-		// TODO disk allocation
+		// TODO disk allocation 
 		file.setName(name);
 		file.setType(type);
 		file.setAttribute(attribute);
@@ -90,7 +84,7 @@ public class FileSystem implements FileSystemInterface{
 	@Override
 	public DirItem createDir(String name, byte attribute, DirItem paretent) throws Exception{
 
-//		TODO CHECK path
+		this.checkPath(paretent);
 
 		// CHECK name's uniqueness
 		this.checkName(name, paretent);
@@ -111,7 +105,8 @@ public class FileSystem implements FileSystemInterface{
 	 */
 	@Override
 	public void deleteDir(DirItem item) throws Exception {
-//		TODO CHECK path
+		
+		this.checkPath(item);
 		
 		// check root directory
 		if(item.getStartBlock() == FileSystemInterface.ROOT) {
@@ -133,6 +128,14 @@ public class FileSystem implements FileSystemInterface{
 
 	@Override
 	public byte[] open(DirItem item, byte mode) throws Exception{
+		
+		this.checkPath(item);
+		
+		//不能以写方式打开只读文件
+		if(mode == FileSystem.WRITE && item.getMode() == DirItem.READONLY) {
+			throw new Exception("不能以写方式打开只读文件");
+		}
+		
 		for(int i = 0; i<5; i++) {
 			if(openedFile.get(i) == null) {
 				item.setMode(mode);
@@ -151,6 +154,7 @@ public class FileSystem implements FileSystemInterface{
 						data[idx] = b;
 						idx++;
 					}
+					blockNum = fat.getLocation(blockNum);
 				}
 				return data;
 			}
@@ -163,12 +167,62 @@ public class FileSystem implements FileSystemInterface{
 
 	@Override
 	public void write(DirItem item, byte[] buffer) throws Exception {
-		// TODO 
+		//检查是否打开，否则打开
+		if(!isOpen(item)) {
+			this.open(item, FileSystem.WRITE);
+		}
+		
+		//判断磁盘剩余空间是否能满足
+		if(buffer.length > fat.getVacantCount()*Disk.blockSize) {
+			throw new Exception("磁盘空间不足");
+		}
+		
+		//获取当前的末尾盘块号
+		byte blockNum = item.getStartBlock();
+		while(fat.getLocation(blockNum) != FAT.USED) {
+			blockNum = fat.getLocation(blockNum);
+		}
+		
+		byte lastBlockNum = blockNum;
+		byte emptyBlockNum;
+		byte[] dividedBlock;
+		
+		int amount = (buffer.length / Disk.blockSize) + 1;
+		
+		for(int i = 0; i < amount; i++) {
+			if(i == amount - 1) {
+				dividedBlock = Arrays.copyOfRange(buffer, i*Disk.blockSize, buffer.length-1);
+			}else {
+				dividedBlock = Arrays.copyOfRange(buffer, i*Disk.blockSize, (i+1)*Disk.blockSize-1);
+			}
+			//获取空盘块号
+			emptyBlockNum = fat.getEmptyLocation();
+			//改写FAT
+			fat.setTable(lastBlockNum, emptyBlockNum);
+			//写入磁盘
+			lastBlockNum = emptyBlockNum;
+			disk.setBlock(lastBlockNum, dividedBlock);
+		}
+		//标志文件结束
+		fat.setTable(lastBlockNum, FAT.USED);
+		
+		//修改目录项的文件长度
+		item.setSize((byte)(item.getSize() +amount));
 		
 	}
 
 	@Override
 	public byte[] read(DirItem item, byte mode) throws Exception {
+		//检查是否以写方式打开，是则不允许读
+		if(mode == FileSystem.WRITE) {
+			throw new Exception("不能以写方式打开");
+		}
+		
+		//检查是否打开，否则打开
+		if(!isOpen(item)) {
+			this.open(item, mode);
+		}
+		
 		byte[] data = new byte[item.getSize()];
 		byte blockNum = item.getStartBlock();
 		int idx = 0;
@@ -183,13 +237,15 @@ public class FileSystem implements FileSystemInterface{
 				data[idx] = b;
 				idx++;
 			}
+			blockNum = fat.getLocation(blockNum);
 		}
 		return data;
 	}
 
 	@Override
 	public void delete(DirItem item) throws Exception {
-//		TODO CHECK path
+		
+		this.checkPath(item);
 		
 		if(this.isOpen(item)) {
 			throw new Exception("文件已打开");
@@ -208,10 +264,8 @@ public class FileSystem implements FileSystemInterface{
 
 	@Override
 	public void modify(DirItem item, byte attribute) throws Exception {
-//		if() {
-//		TODO CHECK path
-//			throw new Exception("文件不存在")；
-//		}
+		
+		this.checkPath(item);
 		
 		if(this.isOpen(item)) {
 			throw new Exception("文件已打开");
@@ -251,14 +305,24 @@ public class FileSystem implements FileSystemInterface{
 
 	@Override
 	public void close(DirItem item, byte[] buffer) throws Exception {
-		if(buffer == null) {
-			int idx = this.openedFile.indexOf(item);
-			this.openedFile.get(idx).setMode(FileSystem.CLOSED);
-			this.openedFile.set(idx, null);
-		} else {
+		if(!isOpen(item)) {
+			return;
+		}
+		
+//		if(buffer == null) {
+//			int idx = this.openedFile.indexOf(item);
+//			this.openedFile.get(idx).setMode(FileSystem.CLOSED);//
+//			this.openedFile.set(idx, null);
+//		} else {
+//			this.write(item, buffer);
+//		}
+		
+		if(buffer != null) {
 			this.write(item, buffer);
 		}
-		//TODO 判断是否打开->检查打开方式->修改目录项->删除已打开表
+		int idx = this.openedFile.indexOf(item);
+		this.openedFile.get(idx).setMode(FileSystem.CLOSED);//
+		this.openedFile.set(idx, null);
 	}
 
 	public FAT getFat() {
@@ -287,19 +351,40 @@ public class FileSystem implements FileSystemInterface{
 	
 	/**
 	 * 检查某目录/路径是否存在
-	 * @throws Exception 
 	 */
 	private boolean checkPath(DirItem item) throws Exception {
 		//TODO 
 //		String path = item.getPath();
-//		throw new Exception("目录不存在");
-		
+//		if() {
+//			throw new Exception("目录不存在");
+//		}
+		return true;
+	}
+	
+	/**
+	 * 检查某目录/路径是否存在
+	 */
+	private boolean checkPath(String path) throws Exception {
+		//TODO 
+//		if() {
+//			throw new Exception("目录不存在");
+//		}
 		return true;
 	}
 	
 	/**
 	 * 检查该目录是否有重名目录/文件
-	 * @throws Exception 
+	 */
+	private void checkName(String name, String path) throws Exception {
+		//TODO
+//		if()) {
+//			throw new Exception("已有该目录/文件");
+//		}
+		return;
+	}
+	
+	/**
+	 * 检查该目录是否有重名目录/文件
 	 */
 	private void checkName(String name, DirItem item) throws Exception {
 		DirItem[] fileTree = this.getFileTree(item);
