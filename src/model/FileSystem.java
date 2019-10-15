@@ -2,7 +2,15 @@ package model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javafx.print.Collation;
 
 public class FileSystem implements FileSystemInterface{
 
@@ -244,9 +252,38 @@ public class FileSystem implements FileSystemInterface{
 	
 	@Override
 	public DirItem[] getFileTree(String path) throws Exception {
-		return null;
-		//TODO 
+		List<String> dirList = FileSystem.parsePath(path);
+		DirItem[] current = this.getFileTree();
+		Iterator<String> iter = dirList.iterator();
+		while(iter.hasNext()) {
+			String name = iter.next();
+			for (DirItem dirItem : current) {
+				if (name.equals(dirItem.getName())) {
+					current = getFileTree(dirItem);
+					break;
+				}
+			}
+		}
+		return current;
 		
+	}
+	
+	/**
+	 * 用于解析路径, 将每一个文件夹名按序存放在数组中返回
+	 * 例: "/aaa/bbb/" 或 "//aaa//bbb" 都返回: ["aaa", "bbb"]  
+	 * @param path
+	 * @return 路径名数组
+	 */
+	public static List<String> parsePath(String path) {
+		String[] paths = path.split("/");
+		List<String> pathList = new ArrayList<String>();
+		for (String string : paths) {
+			pathList.add(string);
+		}
+		Stream<String> stream = pathList.stream();
+		pathList = stream.filter(element->(element.length() != 0)).collect(Collectors.toList());
+		return pathList;
+
 	}
 
 	@Override
