@@ -2,6 +2,11 @@ package model.test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
 import model.DirItem;
@@ -10,59 +15,24 @@ import model.FileSystem;
 class FileSystemTest {
 
 	@Test
-	void testCreateFile() {
-		fail("Not yet implemented");
+	void testParsePath() {
+		String path = "/aaa/bbb/";
+		List<String> paths = FileSystem.parsePath(path);
+		List<String> target = new ArrayList<String>();
+		target.add("aaa");
+		target.add("bbb");
+		assertTrue(paths.equals(target) );
 	}
-
+	
 	@Test
-	void testCreateDir() throws Exception {
-		FileSystem fileSystem = new FileSystem();
-		DirItem dirItem = assertDoesNotThrow(() -> {
-			return fileSystem.createDir("123", DirItem.DIR, "/");
-		});
-		
-		assertEquals("123", dirItem.getName());
-		
-	}
+	void t() {
 
-	@Test
-	void testOpen() {
-		fail("Not yet implemented");
-	}
+	    List list = Arrays.asList(new String[] { "A", "B", "C", "D" });
+	    List list2 = Arrays.asList(new String[] { "A", "B", "C", "D"});
 
-	@Test
-	void testWrite() {
-		fail("Not yet implemented");
-	}
+	    System.out.println(list.equals(list2));
+	    assertTrue(list.equals(list2));
+	  }
 
-	@Test
-	void testGetFileTree() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	void testGetFileTreeDirItem() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	void testGetFileTreeString() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	void testClose() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	void testGetOpenedFile() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	void testSetOpenedFile() {
-		fail("Not yet implemented");
-	}
 
 }
