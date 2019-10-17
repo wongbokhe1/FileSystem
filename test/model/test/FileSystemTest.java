@@ -24,15 +24,7 @@ class FileSystemTest {
 		assertTrue(paths.equals(target) );
 	}
 	
-	@Test
-	void t() {
 
-	    List list = Arrays.asList(new String[] { "A", "B", "C", "D" });
-	    List list2 = Arrays.asList(new String[] { "A", "B", "C", "D"});
-
-	    System.out.println(list.equals(list2));
-	    assertTrue(list.equals(list2));
-	  }
 
 
 }
