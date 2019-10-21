@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.Group?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.Tab?>
@@ -77,6 +78,11 @@
                   <Insets />
                </GridPane.margin>
             </SplitPane>
+            <Button mnemonicParsing="false" onAction="#createDir" text="新建文件夹" GridPane.halignment="RIGHT">
+               <GridPane.margin>
+                  <Insets right="10.0" />
+               </GridPane.margin>
+            </Button>
          </children>
       </GridPane>
    </children>

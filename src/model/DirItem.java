@@ -8,11 +8,15 @@ public class DirItem implements DirItemInterface {
 	private byte[] values = {0,0,0,0,0,0,0,0};
 	private String path;
 	private byte mode = 0;
+	private byte currentBlock;
+	private byte index;
 	
 	
-	public DirItem(byte[] values, String path) throws Exception {
+	public DirItem(byte[] values, String path, byte currentBlock, byte index) throws Exception {
 		this.values = values;
 		path += "/" + this.getName();
+		this.currentBlock = currentBlock;
+		this.index = index;
 	}
 	
 	public DirItem() {
@@ -27,11 +31,13 @@ public class DirItem implements DirItemInterface {
 
 	@Override
 	public String getName() throws Exception{
-		if ((values[5] & (DirItem.FILE | DirItem.SYS_FILE | DirItem.DIR)) > 0) {
-			byte[] name = Arrays.copyOfRange(this.values, 0, 3);
-			return new String(name);
-		}
-		throw new Exception("目录项错误");
+		byte[] name = Arrays.copyOfRange(this.values, 0, 3);
+		return new String(name);
+//		if ((values[5] & (DirItem.FILE | DirItem.SYS_FILE | DirItem.DIR)) > 0) {
+//			byte[] name = Arrays.copyOfRange(this.values, 0, 3);
+//			return new String(name);
+//		}
+//		throw new Exception("目录项错误");
 	}
 
 	@Override
@@ -154,5 +160,34 @@ public class DirItem implements DirItemInterface {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		try {
+			return this.getName();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public byte getCurrentBlock() {
+		return currentBlock;
+	}
+
+	public void setCurrentBlock(byte currentBlock) {
+		this.currentBlock = currentBlock;
+	}
+
+	public byte getIndex() {
+		return index;
+	}
+
+	public void setIndex(byte index) {
+		this.index = index;
+	}
+	
+
+	
 
 }
