@@ -55,16 +55,16 @@ public class FileSystemController implements Initializable {
 		this.initDiskUsingPieChart();
 		this.initFATTable();
 
-		byte[] values = { 'a', 0, 0, 0, 0, DirItem.FILE, 0, 0 };
-		try {
-			FileLabel f1 = new FileLabel(new DirItem(values, "123"));
-			flowPane.getChildren().add(f1);
-			FileLabel f2 = new FileLabel(new DirItem(values, "123"));
-			flowPane.getChildren().add(f2);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		byte[] values = { 'a', 0, 0, 0, 0, DirItem.FILE, 0, 0 };
+//		try {
+//			FileLabel f1 = new FileLabel(new DirItem(values, "123"));
+//			flowPane.getChildren().add(f1);
+//			FileLabel f2 = new FileLabel(new DirItem(values, "123"));
+//			flowPane.getChildren().add(f2);
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	}
 
 	private void initDiskUsingTable() {
@@ -137,6 +137,11 @@ public class FileSystemController implements Initializable {
 				this.FATTableTextBlocks.get(i).setText(string);
 			}
 		}
+	}
+	
+	@FXML
+	void createDir() { 
+		
 	}
 
 	public FlowPane getFlowPane() {

@@ -17,7 +17,8 @@ public class FAT {
         table[1] = new byte[64];
         table[0][0] = FAT.USED;		//255表示盘块已被占用
         table[0][1] = FAT.USED;		//系统占用第0块和第1块
-        for (int i = 2; i < table[0].length; i++) {
+        table[0][2] = FAT.USED;
+        for (int i = 3; i < table[0].length; i++) {
             table[0][i] = FAT.EMPTY;	//0表示盘块空闲
         }
         for (int i = 0; i < table[1].length; i++) {

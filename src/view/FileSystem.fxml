@@ -2,7 +2,11 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.Group?>
+<<<<<<< HEAD
 <?import javafx.scene.chart.PieChart?>
+=======
+<?import javafx.scene.control.Button?>
+>>>>>>> 8ea9a50bdbf29a65074d915466e25379aa29f1b7
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.Tab?>
@@ -213,6 +217,11 @@
                   <Insets />
                </GridPane.margin>
             </SplitPane>
+            <Button mnemonicParsing="false" onAction="#createDir" text="新建文件夹" GridPane.halignment="RIGHT">
+               <GridPane.margin>
+                  <Insets right="10.0" />
+               </GridPane.margin>
+            </Button>
          </children>
       </GridPane>
    </children>

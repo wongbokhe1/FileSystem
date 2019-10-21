@@ -10,7 +10,10 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.junit.experimental.max.MaxCore;
+
 import javafx.print.Collation;
+import utils.Utility;
 
 public class FileSystem implements FileSystemInterface{
 
@@ -85,25 +88,33 @@ public class FileSystem implements FileSystemInterface{
 		file.setPath(paretent.getPath()+"/"+name);
 		byte blockNum = fat.getEmptyLocation();
 		fat.setTable(blockNum, FAT.USED);
+		
 
 		return file;
 	}
 
 	@Override
-	public DirItem createDir(String name, byte attribute, DirItem paretent) throws Exception{
+	public DirItem createDir(String name, byte attribute, DirItem parent) throws Exception{
 
-		this.checkPath(paretent);
+		this.checkPath(parent);
 
 		// CHECK name's uniqueness
-		this.checkName(name, paretent);
+		this.checkName(name, parent);
 		
 		DirItem dir = new DirItem();
 		// TODO disk allocation
 		dir.setName(name);
 		dir.setAttribute(attribute);
-		dir.setPath(paretent.getPath()+"/"+name);
+		dir.setPath(parent.getPath()+"/"+name);
 		byte blockNum = fat.getEmptyLocation();
+		dir.setStartBlock(blockNum);
 		fat.setTable(blockNum, FAT.USED);
+		
+		byte[] currentBlock = this.disk.getBlock(parent.getStartBlock());
+		byte[][] matrix = Utility.reshape(currentBlock);
+		matrix[parent.getIndex()] = dir.getValues();
+		currentBlock = Utility.flatten(matrix);
+		this.disk.setBlock(parent.getStartBlock(), currentBlock);
 		return dir;
 	}
 	
@@ -132,6 +143,9 @@ public class FileSystem implements FileSystemInterface{
 		// delete single directory
 		byte startBlock = item.getStartBlock();
 		fat.setTable(startBlock, FAT.EMPTY);
+		item.setAttribute((byte)0);
+		byte[] currentBlock = disk.getBlock(item.getCurrentBlock());
+		
 	}
 
 	@Override
@@ -288,7 +302,7 @@ public class FileSystem implements FileSystemInterface{
 		byte[] data = disk.getBlock(FileSystem.ROOT);
 		DirItem[] dirItems = new DirItem[8];
 		for(int i = 0; i<8; i++) {
-			dirItems[i] = new DirItem(Arrays.copyOfRange(data, i*8, i*8+7), "/");
+			dirItems[i] = new DirItem(Arrays.copyOfRange(data, i*8, i*8+7), "/", (byte)2, (byte)i);
 		}
 		return dirItems;
 		
@@ -299,7 +313,7 @@ public class FileSystem implements FileSystemInterface{
 		byte[] data = disk.getBlock(item.getStartBlock());
 		DirItem[] dirItems = new DirItem[8];
 		for(int i = 0; i<8; i++) {
-			dirItems[i] = new DirItem(Arrays.copyOfRange(data, i*8, i*8+7), item.getPath());
+			dirItems[i] = new DirItem(Arrays.copyOfRange(data, i*8, i*8+7), item.getPath(), item.getStartBlock(), (byte)i);
 		}
 		return dirItems;
 	}
