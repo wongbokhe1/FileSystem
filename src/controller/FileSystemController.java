@@ -9,7 +9,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Insets;
 import javafx.scene.chart.PieChart;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
@@ -18,6 +17,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import model.DirItem;
 import model.Disk;
+import model.FAT;
 import model.FileLabel;
 import model.FileSystem;
 
@@ -36,19 +36,24 @@ public class FileSystemController implements Initializable {
 	private ObservableList<PieChart.Data> pieChartData;
 	private PieChart.Data usedDisk;
 	private PieChart.Data noUsedDisk;
-	private static int uesd;
-	private static int noUesd;
+	private double uesd = 0;
+	private double noUesd = 0;
 
 	@FXML
 	private GridPane diskUsingTable;
-	
 	private List<StackPane> diskUsingTableBlocks = new ArrayList<StackPane>();
+	
+    @FXML
+    private GridPane FATTable;
+    private List<StackPane> FATTableBlocks = new ArrayList<StackPane>();
+    private List<Text> FATTableTextBlocks = new ArrayList<Text>();
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 
 		this.initDiskUsingTable();
 		this.initDiskUsingPieChart();
+		this.initFATTable();
 
 		byte[] values = { 'a', 0, 0, 0, 0, DirItem.FILE, 0, 0 };
 		try {
@@ -63,33 +68,75 @@ public class FileSystemController implements Initializable {
 	}
 
 	private void initDiskUsingTable() {
-		this.diskUsingTable.setPadding(new Insets(3.0, 3.0, 3.0, 3.0));
-		this.diskUsingTable.setHgap(3.0);
-		this.diskUsingTable.setVgap(3.0);
 		for (int i = 0; i < Disk.totalBlock; i++) {
 			Text diskBlock = new Text(String.valueOf(i));
 			StackPane stackPane = new StackPane();
 			stackPane.getChildren().add(diskBlock);
-			stackPane.setStyle("-fx-background-color: #c8c8c8");
+			stackPane.setStyle("-fx-background-color: #DDDDDD");
 			this.diskUsingTableBlocks.add(stackPane);
 			this.diskUsingTable.add(stackPane, i%8, i/8);
 		}
 	}
 	
-	private void upDateDiskUsingTable() {
-		//TODO
+	public void upDateDiskUsingTable() {
+		for (int i = 0; i < Disk.totalBlock; i++) {
+			if(this.fileSystem.getFat().getLocation((byte) i) != FAT.EMPTY) {
+				this.diskUsingTableBlocks.get(i).setStyle("-fx-background-color: #FF3333");
+				this.uesd++;
+			}else {
+				this.diskUsingTableBlocks.get(i).setStyle("-fx-background-color: #DDDDDD");
+				this.noUesd--;
+			}
+		}
 	}
 
 	private void initDiskUsingPieChart() {
 		this.usedDisk = new PieChart.Data("已使用", this.uesd);
 		this.noUsedDisk = new PieChart.Data("未使用", this.noUesd);
 		this.pieChartData = FXCollections.observableArrayList(this.usedDisk, this.noUsedDisk);
-		
 		this.diskUsingPieChart.setData(this.pieChartData);
 	}
 	
-	private void upDateDiskUsingPieChart() {
-		//TODO
+	public void upDateDiskUsingPieChart() {
+		this.usedDisk.setPieValue(this.uesd);
+		this.noUsedDisk.setPieValue(this.noUesd);
+	}
+	
+	private void initFATTable() {
+		for (byte i = 0; i < 3; i++) {
+			Text diskBlock = new Text("-1");
+			StackPane stackPane = new StackPane();
+			stackPane.getChildren().add(diskBlock);
+			stackPane.setStyle("-fx-background-color: #DDDDDD");
+			this.FATTableTextBlocks.add(diskBlock);
+			this.FATTableBlocks.add(stackPane);
+			this.FATTable.add(stackPane, i/64, i%64);
+		}
+		for (int i = 3; i < Disk.totalBlock; i++) {
+			//TODO get true FAT
+//			Text diskBlock = new Text(String.valueOf(this.fileSystem.getFat().getLocation(i)));
+			Text diskBlock = new Text("0");
+			StackPane stackPane = new StackPane();
+			stackPane.getChildren().add(diskBlock);
+			stackPane.setStyle("-fx-background-color: #DDDDDD");
+			this.FATTableTextBlocks.add(diskBlock);
+			this.FATTableBlocks.add(stackPane);
+			this.FATTable.add(stackPane, i/64, i%64);
+		}
+	}
+	
+	public void upDateFATTable() {
+		for (int i = 0; i < Disk.totalBlock; i++) {
+			if(this.fileSystem.getFat().getLocation((byte) i) != FAT.EMPTY) {
+				this.FATTableBlocks.get(i).setStyle("-fx-background-color: #FF3333");
+				String string = String.valueOf(this.fileSystem.getFat().getLocation((byte) i));
+				this.FATTableTextBlocks.get(i).setText(string);
+			}else {
+				this.FATTableBlocks.get(i).setStyle("-fx-background-color: #DDDDDD");
+				String string = String.valueOf(this.fileSystem.getFat().getLocation((byte) i));
+				this.FATTableTextBlocks.get(i).setText(string);
+			}
+		}
 	}
 
 	public FlowPane getFlowPane() {
