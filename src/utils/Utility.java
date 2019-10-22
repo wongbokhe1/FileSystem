@@ -54,11 +54,15 @@ public class Utility {
 	public static int countValidItem(DirItem[] items, FileSystem fileSys) {
 		int count = 0;
 		for (DirItem dirItem : items) {
-			if(dirItem.getStartBlock() != 0 && fileSys.getFat().getLocation(dirItem.getStartBlock()) != FAT.EMPTY) {
+			if(Utility.validItem(dirItem, fileSys)) {
 				count += 1;
 			}
 		}
 		return count;
+	}
+	
+	public static boolean validItem(DirItem item, FileSystem fileSys) {
+		return item.getStartBlock() != 0 && fileSys.getFat().getLocation(item.getStartBlock()) != FAT.EMPTY;
 	}
 	
 	public static byte[][] reshape(byte[] raw) {

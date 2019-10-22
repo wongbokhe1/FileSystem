@@ -45,16 +45,6 @@ public class FileLabel extends Label {
 		super.setAlignment(Pos.CENTER);
 		super.setTextOverrun(OverrunStyle.CENTER_ELLIPSIS);
 
-		this.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
-
-			@Override
-			public void handle(MouseEvent event) {
-				if (event.getClickCount() >= 2 && event.getButton() == MouseButton.PRIMARY) {
-					// 双击打开事件
-					// TODO 打开编辑窗口
-					
-				}
-			}
-		});
+		
 	}
 }
