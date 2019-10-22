@@ -23,13 +23,12 @@ public class FileLabel extends Label {
 
 	public FileLabel(DirItem dirItem) throws MalformedURLException {
 		this.dirItem = dirItem;
-		if (true) {
+		if (dirItem.getAttribute() == DirItem.FILE) {
 			// TODO 判断文件/目录
 			this.image = new Image(Main.class.getResourceAsStream("/view/file.png"), 85, 85, true, true);
+		} else {
+			this.image = new Image(Main.class.getResourceAsStream("/view/folder.png"), 85, 85, true, true);
 		}
-//		else {
-//			this.image = new Image(Main.class.getResourceAsStream("/view/folder.png"),70,70,true,true);
-//		}
 		this.imageView = new ImageView(this.image);
 		super.setGraphic(this.imageView);
 		try {
@@ -45,6 +44,11 @@ public class FileLabel extends Label {
 		super.setAlignment(Pos.CENTER);
 		super.setTextOverrun(OverrunStyle.CENTER_ELLIPSIS);
 
-		
 	}
+
+	@Override
+	public String toString() {
+		return dirItem.toString();
+	}
+
 }

@@ -190,10 +190,8 @@ public class FileSystemController extends RootController{
 									if (event.getClickCount() >= 2 && event.getButton() == MouseButton.PRIMARY) {
 										// 双击打开事件
 										// TODO 打开编辑窗口
-										
-									}
-									if(event.getClickCount() == 1 && event.getButton() == MouseButton.PRIMARY) {
-										// TODO 单击 选中 
+										FileLabel f = (FileLabel)event.getSource();
+										System.out.println("file opened: " + f);
 									}
 								}
 							});
