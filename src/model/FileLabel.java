@@ -5,6 +5,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import application.Main;
+import controller.EditorController;
+import controller.RootController;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -51,8 +53,12 @@ public class FileLabel extends Label {
 			public void handle(MouseEvent event) {
 				if (event.getClickCount() >= 2 && event.getButton() == MouseButton.PRIMARY) {
 					// 双击打开事件
-					// TODO 打开编辑窗口
+					RootController.controllers.get("controller.EditorController").getStage().hide();
+					//TODO 向编辑窗口传递数据
 					
+					// TODO 打开编辑窗口
+					((EditorController)RootController.controllers.get("controller.EditorController")).getStage().show();
+					// TODO overwrite .show() for other feature
 				}
 			}
 		});
