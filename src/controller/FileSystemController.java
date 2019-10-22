@@ -1,25 +1,27 @@
 package controller;
 
 import java.net.URL;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.ResourceBundle;
+
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
@@ -41,27 +43,24 @@ public class FileSystemController extends RootController{
     
 	private FileSystem fileSystem;
 	
+	private ContextMenu flowpaneMenu;
+	
 	private NotepadController notepadController;
+	
+	private String currentPath;
 
-    @FXML
-    private Rectangle rect;
     
-    @FXML
-    private Button createFileButton;
 
-    @FXML
-    private Button createDirButton;
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		FileSystemController.this.createDirButton.setDisable(true);
-		FileSystemController.this.createFileButton.setDisable(true);
 		
 		this.fileSystem = new FileSystem();
 		// TODO Auto-generated method stub
 		try {
 			Utility.genTreeView(this.treeView, this.fileSystem);
 			this.initListener();
+			this.initHandler();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -69,8 +68,7 @@ public class FileSystemController extends RootController{
 		
 	}
 	
-    @FXML
-    public void createDir(ActionEvent event) {
+    public void createDir() {
     	DirItem[] itemList;
     	DirItem parentDir;
 		try {
@@ -103,18 +101,13 @@ public class FileSystemController extends RootController{
 			Alert errorAlert = new Alert(AlertType.ERROR);
 			errorAlert.setTitle("error");
 			errorAlert.setHeaderText(null);
-			if("文件名过长, 最大允许长度为3".equals(e.getMessage())) {
-				errorAlert.setContentText("文件名过长, 最大允许长度为3");
-			} else {
-				e.printStackTrace();
-			}
+			errorAlert.setContentText(e.getMessage());
 			errorAlert.showAndWait();
 			
 		}
     }
     
-    @FXML
-    void createFile(ActionEvent event) {
+    void createFile() {
     	DirItem[] itemList;
     	DirItem parentDir;
 		try {
@@ -147,11 +140,8 @@ public class FileSystemController extends RootController{
 			Alert errorAlert = new Alert(AlertType.ERROR);
 			errorAlert.setTitle("error");
 			errorAlert.setHeaderText(null);
-			if("文件名过长, 最大允许长度为3".equals(e.getMessage())) {
-				errorAlert.setContentText("文件名过长, 最大允许长度为3");
-			} else {
-				e.printStackTrace();
-			}
+			errorAlert.setContentText(e.getMessage());
+			e.printStackTrace();
 			errorAlert.showAndWait();
 			
 		}
@@ -172,13 +162,16 @@ public class FileSystemController extends RootController{
 			@Override
 			public void changed(ObservableValue<? extends TreeItem<DirItem>> observable, TreeItem<DirItem> oldValue,
 					TreeItem<DirItem> newValue) {
-				if(newValue!=null) {
-					FileSystemController.this.createDirButton.setDisable(false);
-					FileSystemController.this.createFileButton.setDisable(false);
+				FileSystemController.this.flowPane.getChildren().clear();
+				if(newValue==null) {
+					return;
 				}
 				
+				FileSystemController.this.currentPath = newValue.getValue().getPath();
+				System.out.println(FileSystemController.this.currentPath);
+				
 				try {
-					FileSystemController.this.flowPane.getChildren().clear();
+//					FileSystemController.this.flowPane.getChildren().clear();
 					DirItem[] items = FileSystemController.this.fileSystem.getFileTree(newValue.getValue());
 					for (DirItem dirItem : items) {
 						if(Utility.validItem(dirItem, FileSystemController.this.fileSystem)) {
@@ -192,9 +185,13 @@ public class FileSystemController extends RootController{
 										// TODO 打开编辑窗口
 										FileLabel f = (FileLabel)event.getSource();
 										System.out.println("file opened: " + f);
+									} else if(event.getButton() == MouseButton.SECONDARY) {
+										
 									}
 								}
 							});
+							
+							
 							FileSystemController.this.flowPane.getChildren().add(fileLabel);
 						}
 					}
@@ -209,22 +206,48 @@ public class FileSystemController extends RootController{
     		
     	});
     }
+    
+    public void initHandler() {
+    	addFlowPaneHandler();
+    }
+    
+    public void addFlowPaneHandler() {
+		ContextMenu menu = new ContextMenu();
+		MenuItem createFile = new MenuItem("新建文件");
+		MenuItem createDir = new MenuItem("新建文件夹");
+		createFile.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				FileSystemController.this.createFile();
+			}
+		});
+		createDir.setOnAction(new EventHandler<ActionEvent>() {
 
-	public Button getCreateFileButton() {
-		return createFileButton;
-	}
+			@Override
+			public void handle(ActionEvent event) {
+				FileSystemController.this.createDir();
+			}
+		});
+		menu.getItems().addAll(new MenuItem[] {createFile, createDir} );
+		
+		this.flowpaneMenu = menu;
+		
+    	this.flowPane.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
 
-	public void setCreateFileButton(Button createFileButton) {
-		this.createFileButton = createFileButton;
-	}
+			@Override
+			public void handle(MouseEvent event) {
+				if(event.getButton() == MouseButton.SECONDARY && FileSystemController.this.treeView.getSelectionModel().getSelectedItem() != null) {
+					FileSystemController.this.flowpaneMenu.show(FileSystemController.this.flowPane, event.getScreenX(), event.getScreenY());
+				}
+				else if(event.getButton() == MouseButton.PRIMARY || FileSystemController.this.flowpaneMenu.isShowing()){
+					FileSystemController.this.flowpaneMenu.hide();
+				}
+			}
+		});
+    	
+    	
+    }
 
-	public Button getCreateDirButton() {
-		return createDirButton;
-	}
-
-	public void setCreateDirButton(Button createDirButton) {
-		this.createDirButton = createDirButton;
-	}
 
 	@Override
 	public Stage getStage() {

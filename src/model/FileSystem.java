@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 import org.junit.experimental.max.MaxCore;
 
 import javafx.print.Collation;
+import sun.security.util.Length;
 import utils.Utility;
 
 public class FileSystem implements FileSystemInterface{
@@ -36,9 +37,6 @@ public class FileSystem implements FileSystemInterface{
 			throw new Exception("不能建立只读文件");
 		}
 		
-		this.checkPath(parent);
-		
-		// CHECK name's uniqueness
 		this.checkName(name, parent);
 		
 		
@@ -50,6 +48,7 @@ public class FileSystem implements FileSystemInterface{
 		file.setSize((byte) 0);
 		file.setPath(parent.getPath()+"/"+name);
 		byte blockNum = fat.getEmptyLocation();
+		file.setStartBlock(blockNum);
 		fat.setTable(blockNum, FAT.USED);
 		
 		byte[] currentBlock = this.disk.getBlock(parent.getStartBlock());
@@ -63,8 +62,6 @@ public class FileSystem implements FileSystemInterface{
 
 	@Override
 	public DirItem createDir(String name, byte attribute, DirItem parent, int index) throws Exception{
-
-		this.checkPath(parent);
 
 		// CHECK name's uniqueness
 		this.checkName(name, parent);
@@ -286,6 +283,7 @@ public class FileSystem implements FileSystemInterface{
 		byte[] data = disk.getBlock(item.getStartBlock());
 		DirItem[] dirItems = new DirItem[8];
 		for(int i = 0; i<8; i++) {
+			String nameString = new String(Arrays.copyOfRange(data, i*8, i*8+3));
 			dirItems[i] = new DirItem(Arrays.copyOfRange(data, i*8, i*8+8), item.getPath(), item.getStartBlock(), (byte)i);
 		}
 		return dirItems;
@@ -396,16 +394,6 @@ public class FileSystem implements FileSystemInterface{
 		return true;
 	}
 	
-	/**
-	 * 检查该目录是否有重名目录/文件
-	 */
-	private void checkName(String name, String path) throws Exception {
-		//TODO
-//		if()) {
-//			throw new Exception("已有该目录/文件");
-//		}
-		return;
-	}
 	
 	/**
 	 * 检查该目录是否有重名目录/文件
@@ -413,7 +401,7 @@ public class FileSystem implements FileSystemInterface{
 	private void checkName(String name, DirItem item) throws Exception {
 		DirItem[] fileTree = this.getFileTree(item);
 		for(DirItem d: fileTree) {
-			if(name.equalsIgnoreCase(d.getName())) {
+			if(Utility.validItem(d,  this) && name.equals(d.getName().trim())) {
 				throw new Exception("已有该目录/文件");
 			}
 		}
