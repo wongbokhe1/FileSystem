@@ -13,7 +13,7 @@ import model.FileSystem;
 
 public class Utility {
 	public static void genTreeView(TreeView<DirItem> treeView, FileSystem fileSys) throws Exception {
-		TreeItem<DirItem> treeRoot = new TreeItem<DirItem>(new DirItem("/\0\0\0\0\2\2\0".getBytes(), "", (byte)2, (byte)0));
+		TreeItem<DirItem> treeRoot = new TreeItem<DirItem>(new DirItem("/\0\0\0\0\2\2\0".getBytes(), "/", (byte)2, (byte)0));
 		treeView.setRoot(treeRoot);
 		DirItem[] rootItems = fileSys.getFileTree();
 		for (DirItem dirItem : rootItems) {
@@ -64,7 +64,7 @@ public class Utility {
 	public static byte[][] reshape(byte[] raw) {
 		byte[][] rnt = new byte[8][8];
 		for(int i = 0; i<8; i++) {
-			rnt[i] = Arrays.copyOfRange(raw, i*8, i*8+7); 
+			rnt[i] = Arrays.copyOfRange(raw, i*8, i*8+8); 
 		}
 		return rnt;
 	}

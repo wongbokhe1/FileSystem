@@ -28,7 +28,7 @@ public class FileSystem implements FileSystemInterface{
 	}
 	
 	@Override
-	public DirItem createFile(String name, String type, byte attribute, String path) throws Exception{
+	public DirItem createFile(String name, String type, byte attribute, String path, int index) throws Exception{
 		if ((attribute | DirItem.READONLY) == 0) {
 			throw new Exception("不能建立只读文件");
 		}
@@ -52,7 +52,7 @@ public class FileSystem implements FileSystemInterface{
 	}
 
 	@Override
-	public DirItem createDir(String name, byte attribute, String path) throws Exception{
+	public DirItem createDir(String name, byte attribute, String path, int index) throws Exception{
 		this.checkPath(path);
 		
 		this.checkName(name, path);
@@ -68,15 +68,15 @@ public class FileSystem implements FileSystemInterface{
 	}
 	
 	@Override
-	public DirItem createFile(String name, String type, byte attribute, DirItem paretent) throws Exception{
+	public DirItem createFile(String name, String type, byte attribute, DirItem parent, int index) throws Exception{
 		if ((attribute | DirItem.READONLY) == 0) {
 			throw new Exception("不能建立只读文件");
 		}
 		
-		this.checkPath(paretent);
+		this.checkPath(parent);
 		
 		// CHECK name's uniqueness
-		this.checkName(name, paretent);
+		this.checkName(name, parent);
 		
 		
 		DirItem file = new DirItem();
@@ -85,16 +85,21 @@ public class FileSystem implements FileSystemInterface{
 		file.setType(type);
 		file.setAttribute(attribute);
 		file.setSize((byte) 0);
-		file.setPath(paretent.getPath()+"/"+name);
+		file.setPath(parent.getPath()+"/"+name);
 		byte blockNum = fat.getEmptyLocation();
 		fat.setTable(blockNum, FAT.USED);
 		
-
+		byte[] currentBlock = this.disk.getBlock(parent.getStartBlock());
+		byte[][] matrix = Utility.reshape(currentBlock);
+		matrix[index] = file.getValues();
+		currentBlock = Utility.flatten(matrix);
+		this.disk.setBlock(parent.getStartBlock(), currentBlock);
 		return file;
+		
 	}
 
 	@Override
-	public DirItem createDir(String name, byte attribute, DirItem parent) throws Exception{
+	public DirItem createDir(String name, byte attribute, DirItem parent, int index) throws Exception{
 
 		this.checkPath(parent);
 
@@ -112,7 +117,7 @@ public class FileSystem implements FileSystemInterface{
 		
 		byte[] currentBlock = this.disk.getBlock(parent.getStartBlock());
 		byte[][] matrix = Utility.reshape(currentBlock);
-		matrix[parent.getIndex()] = dir.getValues();
+		matrix[index] = dir.getValues();
 		currentBlock = Utility.flatten(matrix);
 		this.disk.setBlock(parent.getStartBlock(), currentBlock);
 		return dir;
@@ -134,11 +139,15 @@ public class FileSystem implements FileSystemInterface{
 		
 		// check empty directory
 		DirItem[] fileTree = this.getFileTree(item);
-		for (DirItem i: fileTree) {
-			if(!i.isEmpty()) {
-				throw new Exception("该目录不为空目录，不能删除");
-			}
+		if(Utility.countValidItem(fileTree, this) > 0) {
+			throw new Exception("该目录不为空目录，不能删除");
 		}
+		
+//		for (DirItem i: fileTree) {
+//			if(!i.isEmpty()) {
+//				
+//			}
+//		}
 		
 		// delete single directory
 		byte startBlock = item.getStartBlock();
@@ -211,11 +220,12 @@ public class FileSystem implements FileSystemInterface{
 		
 		int amount = (buffer.length / Disk.blockSize) + 1;
 		
-		for(int i = 0; i < amount; i++) {
+		for(int i = 0; i < amount; i++) { 
 			if(i == amount - 1) {
 				dividedBlock = Arrays.copyOfRange(buffer, i*Disk.blockSize, buffer.length-1);
 			}else {
 				dividedBlock = Arrays.copyOfRange(buffer, i*Disk.blockSize, (i+1)*Disk.blockSize-1);
+				// TODO copyOfRange range? 
 			}
 			//获取空盘块号
 			emptyBlockNum = fat.getEmptyLocation();
@@ -302,7 +312,7 @@ public class FileSystem implements FileSystemInterface{
 		byte[] data = disk.getBlock(FileSystem.ROOT);
 		DirItem[] dirItems = new DirItem[8];
 		for(int i = 0; i<8; i++) {
-			dirItems[i] = new DirItem(Arrays.copyOfRange(data, i*8, i*8+7), "/", (byte)2, (byte)i);
+			dirItems[i] = new DirItem(Arrays.copyOfRange(data, i*8, i*8+8), "/", (byte)2, (byte)i);
 		}
 		return dirItems;
 		
@@ -313,7 +323,7 @@ public class FileSystem implements FileSystemInterface{
 		byte[] data = disk.getBlock(item.getStartBlock());
 		DirItem[] dirItems = new DirItem[8];
 		for(int i = 0; i<8; i++) {
-			dirItems[i] = new DirItem(Arrays.copyOfRange(data, i*8, i*8+7), item.getPath(), item.getStartBlock(), (byte)i);
+			dirItems[i] = new DirItem(Arrays.copyOfRange(data, i*8, i*8+8), item.getPath(), item.getStartBlock(), (byte)i);
 		}
 		return dirItems;
 	}

@@ -14,7 +14,12 @@ public class DirItem implements DirItemInterface {
 	
 	public DirItem(byte[] values, String path, byte currentBlock, byte index) throws Exception {
 		this.values = values;
-		path += "/" + this.getName();
+		if("/".equals(path)) {
+			path = "/";
+		}
+		else {
+			path += "/" + this.getName();
+		}
 		this.currentBlock = currentBlock;
 		this.index = index;
 	}
@@ -66,7 +71,10 @@ public class DirItem implements DirItemInterface {
 		if(bName.length > 3) {
 			throw new Exception("文件名过长, 最大允许长度为3");
 		}
-		for(int i = 0; i<3; i++) {
+		for (int i = 0; i<3; i++) {
+			this.values[i] = 0; 
+		}
+		for(int i = 0; i<bName.length; i++) {
 			this.values[i] = bName[i];
 		}
 		
@@ -86,7 +94,7 @@ public class DirItem implements DirItemInterface {
 			throw new Exception("类型名过长, 最大允许长度为2");
 		}
 		for(int i = 0; i<2; i++) {
-			this.values[i+3] = bName[i+3];
+			this.values[i+3] = bName[i];
 		}
 		
 	}

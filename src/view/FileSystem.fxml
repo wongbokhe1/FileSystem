@@ -2,11 +2,8 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.Group?>
-<<<<<<< HEAD
 <?import javafx.scene.chart.PieChart?>
-=======
 <?import javafx.scene.control.Button?>
->>>>>>> 8ea9a50bdbf29a65074d915466e25379aa29f1b7
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.Tab?>
@@ -17,6 +14,7 @@
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.shape.Rectangle?>
 
@@ -217,11 +215,20 @@
                   <Insets />
                </GridPane.margin>
             </SplitPane>
-            <Button mnemonicParsing="false" onAction="#createDir" text="新建文件夹" GridPane.halignment="RIGHT">
-               <GridPane.margin>
-                  <Insets right="10.0" />
-               </GridPane.margin>
-            </Button>
+            <HBox alignment="TOP_CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.halignment="RIGHT">
+               <children>
+                  <Button fx:id="createFileButton" alignment="CENTER_RIGHT" contentDisplay="RIGHT" mnemonicParsing="false" onAction="#createFile" text="新建文件">
+                     <HBox.margin>
+                        <Insets right="10.0" />
+                     </HBox.margin>
+                  </Button>
+                  <Button fx:id="createDirButton" mnemonicParsing="false" onAction="#createDir" text="新建文件夹">
+                     <HBox.margin>
+                        <Insets right="10.0" />
+                     </HBox.margin>
+                  </Button>
+               </children>
+            </HBox>
          </children>
       </GridPane>
    </children>

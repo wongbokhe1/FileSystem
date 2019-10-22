@@ -9,10 +9,10 @@ public interface FileSystemInterface {
 	public static byte[] buffer1 = new byte[64];
 	public static byte[] buffer2 = new byte[64];
 	
-	public DirItem createFile(String name, String type, byte attribute, String path) throws Exception;
-	public DirItem createDir(String name, byte attribute, String path) throws Exception;
-	public DirItem createFile(String name, String type, byte attribute, DirItem paretent) throws Exception;
-	public DirItem createDir(String name, byte attribute, DirItem paretent) throws Exception;
+	public DirItem createFile(String name, String type, byte attribute, String path, int index) throws Exception;
+	public DirItem createDir(String name, byte attribute, String path, int index) throws Exception;
+	public DirItem createFile(String name, String type, byte attribute, DirItem paretent, int index) throws Exception;
+	public DirItem createDir(String name, byte attribute, DirItem paretent, int index) throws Exception;
 	public void deleteDir(DirItem item) throws Exception;
 	public byte[] open(DirItem item, byte mode) throws Exception;
 	public void close(DirItem item, byte[] buffer) throws Exception;
