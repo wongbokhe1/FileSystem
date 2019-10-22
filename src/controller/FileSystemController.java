@@ -41,8 +41,6 @@ public class FileSystemController extends RootController{
     
 	private FileSystem fileSystem;
 	
-	private NotepadController notepadController;
-
     @FXML
     private Rectangle rect;
     
@@ -189,9 +187,15 @@ public class FileSystemController extends RootController{
 								public void handle(MouseEvent event) {
 									if (event.getClickCount() >= 2 && event.getButton() == MouseButton.PRIMARY) {
 										// 双击打开事件
-										// TODO 打开编辑窗口
+										
 										FileLabel f = (FileLabel)event.getSource();
 										System.out.println("file opened: " + f);
+										// 打开编辑窗口
+										if(!RootController.controllers.get("controller.NotepadController").getStage().isShowing()) {
+											((NotepadController)RootController.controllers.get("controller.NotepadController")).getStage().show();
+										}
+										// 打开对应文件
+										((NotepadController)RootController.controllers.get("controller.NotepadController")).openFile(((FileLabel)event.getSource()).getDirItem());
 									}
 								}
 							});
@@ -234,6 +238,10 @@ public class FileSystemController extends RootController{
 	@Override
 	public void setStage(Stage stage) {
 		this.stage = stage;
+	}
+
+	public FileSystem getFileSystem() {
+		return fileSystem;
 	}
 
 

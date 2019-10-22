@@ -1,13 +1,7 @@
 package model;
 
-import java.io.File;
 import java.net.MalformedURLException;
-import java.net.URL;
-
 import application.Main;
-import controller.EditorController;
-import controller.RootController;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.ContentDisplay;
@@ -15,8 +9,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.OverrunStyle;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 
 public class FileLabel extends Label {
 	private DirItem dirItem;
@@ -47,10 +39,14 @@ public class FileLabel extends Label {
 		super.setTextOverrun(OverrunStyle.CENTER_ELLIPSIS);
 
 	}
-
+	
 	@Override
 	public String toString() {
 		return dirItem.toString();
+	}
+
+	public DirItem getDirItem() {
+		return dirItem;
 	}
 
 }
