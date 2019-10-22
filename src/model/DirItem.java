@@ -15,10 +15,10 @@ public class DirItem implements DirItemInterface {
 	public DirItem(byte[] values, String path, byte currentBlock, byte index) throws Exception {
 		this.values = values;
 		if("/".equals(path)) {
-			path = "/";
+			this.path = "/" + this.getName().trim();
 		}
 		else {
-			path += "/" + this.getName();
+			this.path = path + "/" + this.getName().trim();
 		}
 		this.currentBlock = currentBlock;
 		this.index = index;
@@ -47,10 +47,8 @@ public class DirItem implements DirItemInterface {
 
 	@Override
 	public String getType() throws Exception{
-		if ((values[5] & (DirItem.FILE | DirItem.SYS_FILE)) == 0) {
-			return new String(Arrays.copyOfRange(this.values, 3, 5));
-		}
-		throw new Exception("对非文件取类型");
+		return new String(Arrays.copyOfRange(this.values, 3, 5));
+
 		
 	}
 
@@ -171,7 +169,12 @@ public class DirItem implements DirItemInterface {
 	@Override
 	public String toString() {
 		try {
-			return this.getName();
+			if((this.getAttribute() & DirItem.DIR) > 0) {
+				return this.getName().trim();
+			} else {
+				return this.getName().trim() + "." + this.getType().trim();
+			}
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

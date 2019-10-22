@@ -3,6 +3,7 @@ package utils;
 import java.util.Arrays;
 
 import com.sun.jndi.url.iiopname.iiopnameURLContextFactory;
+import com.sun.org.apache.bcel.internal.generic.NEW;
 
 import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
@@ -13,7 +14,8 @@ import model.FileSystem;
 
 public class Utility {
 	public static void genTreeView(TreeView<DirItem> treeView, FileSystem fileSys) throws Exception {
-		TreeItem<DirItem> treeRoot = new TreeItem<DirItem>(new DirItem("/\0\0\0\0\2\2\0".getBytes(), "/", (byte)2, (byte)0));
+		byte[] val = new byte[] {'/', 0,0,0,0,8,2,0};
+		TreeItem<DirItem> treeRoot = new TreeItem<DirItem>(new DirItem(val, "/", (byte)2, (byte)0));
 		treeView.setRoot(treeRoot);
 		DirItem[] rootItems = fileSys.getFileTree();
 		for (DirItem dirItem : rootItems) {
