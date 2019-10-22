@@ -2,11 +2,8 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.Group?>
-<<<<<<< HEAD
 <?import javafx.scene.chart.PieChart?>
-=======
 <?import javafx.scene.control.Button?>
->>>>>>> 8ea9a50bdbf29a65074d915466e25379aa29f1b7
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.Tab?>

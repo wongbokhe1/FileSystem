@@ -21,11 +21,13 @@ import model.FAT;
 import model.FileLabel;
 import model.FileSystem;
 
-public class FileSystemController implements Initializable {
+public class FileSystemController extends RootController{
 
 	private Stage stage;
 
 	private FileSystem fileSystem;
+	
+	private NotepadController notepadController;
 
 	@FXML
 	private FlowPane flowPane;
