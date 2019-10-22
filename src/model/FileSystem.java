@@ -27,45 +27,8 @@ public class FileSystem implements FileSystemInterface{
 		
 	}
 	
-	@Override
-	public DirItem createFile(String name, String type, byte attribute, String path, int index) throws Exception{
-		if ((attribute | DirItem.READONLY) == 0) {
-			throw new Exception("不能建立只读文件");
-		}
-		
-		this.checkPath(path);
-		
-		this.checkName(name, path);
-		
-		
-		DirItem file = new DirItem();
-		// TODO disk allocation
-		file.setName(name);
-		file.setType(type);
-		file.setAttribute(attribute);
-		file.setSize((byte) 0);
-		file.setPath(path);
-		byte blockNum = fat.getEmptyLocation();
-		fat.setTable(blockNum, FAT.USED);
 
-		return file;
-	}
 
-	@Override
-	public DirItem createDir(String name, byte attribute, String path, int index) throws Exception{
-		this.checkPath(path);
-		
-		this.checkName(name, path);
-		
-		DirItem dir = new DirItem();
-		// TODO disk allocation
-		dir.setName(name);
-		dir.setAttribute(attribute);
-		dir.setPath(path);
-		byte blockNum = fat.getEmptyLocation();
-		fat.setTable(blockNum, FAT.USED);
-		return dir;
-	}
 	
 	@Override
 	public DirItem createFile(String name, String type, byte attribute, DirItem parent, int index) throws Exception{

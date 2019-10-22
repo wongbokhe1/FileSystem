@@ -8,10 +8,13 @@ import java.util.ResourceBundle;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.TreeItem;
@@ -21,6 +24,7 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import model.DirItem;
+import model.FileLabel;
 import model.FileSystem;
 import utils.Utility;
 
@@ -34,6 +38,7 @@ public class FileSystemController extends RootController{
 
     @FXML
     private FlowPane flowPane;
+    
 	private FileSystem fileSystem;
 	
 	private NotepadController notepadController;
@@ -61,7 +66,6 @@ public class FileSystemController extends RootController{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 		
 	}
 	
@@ -172,6 +176,33 @@ public class FileSystemController extends RootController{
 					FileSystemController.this.createDirButton.setDisable(false);
 					FileSystemController.this.createFileButton.setDisable(false);
 				}
+				
+				try {
+					FileSystemController.this.flowPane.getChildren().clear();
+					DirItem[] items = FileSystemController.this.fileSystem.getFileTree(newValue.getValue());
+					for (DirItem dirItem : items) {
+						if(Utility.validItem(dirItem, FileSystemController.this.fileSystem)) {
+							FileLabel fileLabel = new FileLabel(dirItem);
+							fileLabel.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+
+								@Override
+								public void handle(MouseEvent event) {
+									if (event.getClickCount() >= 2 && event.getButton() == MouseButton.PRIMARY) {
+										// 双击打开事件
+										// TODO 打开编辑窗口
+										FileLabel f = (FileLabel)event.getSource();
+										System.out.println("file opened: " + f);
+									}
+								}
+							});
+							FileSystemController.this.flowPane.getChildren().add(fileLabel);
+						}
+					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
 				
 			}
 

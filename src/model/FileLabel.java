@@ -25,13 +25,12 @@ public class FileLabel extends Label {
 
 	public FileLabel(DirItem dirItem) throws MalformedURLException {
 		this.dirItem = dirItem;
-		if (true) {
+		if (dirItem.getAttribute() == DirItem.FILE) {
 			// TODO 判断文件/目录
 			this.image = new Image(Main.class.getResourceAsStream("/view/file.png"), 85, 85, true, true);
+		} else {
+			this.image = new Image(Main.class.getResourceAsStream("/view/folder.png"), 85, 85, true, true);
 		}
-//		else {
-//			this.image = new Image(Main.class.getResourceAsStream("/view/folder.png"),70,70,true,true);
-//		}
 		this.imageView = new ImageView(this.image);
 		super.setGraphic(this.imageView);
 		try {
@@ -47,20 +46,11 @@ public class FileLabel extends Label {
 		super.setAlignment(Pos.CENTER);
 		super.setTextOverrun(OverrunStyle.CENTER_ELLIPSIS);
 
-		this.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
-
-			@Override
-			public void handle(MouseEvent event) {
-				if (event.getClickCount() >= 2 && event.getButton() == MouseButton.PRIMARY) {
-					// 双击打开事件
-					RootController.controllers.get("controller.EditorController").getStage().hide();
-					//TODO 向编辑窗口传递数据
-					
-					// TODO 打开编辑窗口
-					((EditorController)RootController.controllers.get("controller.EditorController")).getStage().show();
-					// TODO overwrite .show() for other feature
-				}
-			}
-		});
 	}
+
+	@Override
+	public String toString() {
+		return dirItem.toString();
+	}
+
 }
