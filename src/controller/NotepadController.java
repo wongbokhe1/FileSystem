@@ -7,8 +7,11 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
+import javafx.stage.Stage;
 
-public class EditController implements Initializable {
+public class NotepadController extends RootController {
+	
+	private Stage notePadStage;
 	
     @FXML
     private MenuItem saveButton;
@@ -26,6 +29,16 @@ public class EditController implements Initializable {
 	public void initialize(URL location, ResourceBundle resources) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public Stage getStage() {
+		return this.notePadStage;
+	}
+
+	@Override
+	public void setStage(Stage stage) {
+		this.notePadStage = stage;
 	}
 
 }

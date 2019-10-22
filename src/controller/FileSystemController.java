@@ -19,23 +19,24 @@ import javafx.scene.control.TreeView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.Stage;
 import model.DirItem;
 import model.FileSystem;
 import utils.Utility;
 
-public class FileSystemController implements Initializable{
-	
-	private FileSystem fileSystem;
-	
-	
-    @FXML
-    private AnchorPane parentPane;
+
+public class FileSystemController extends RootController{
 
     @FXML
     private TreeView<DirItem> treeView;
+    
+    private Stage stage;
 
     @FXML
     private FlowPane flowPane;
+	private FileSystem fileSystem;
+	
+	private NotepadController notepadController;
 
     @FXML
     private Rectangle rect;
@@ -193,6 +194,18 @@ public class FileSystemController implements Initializable{
 	public void setCreateDirButton(Button createDirButton) {
 		this.createDirButton = createDirButton;
 	}
+
+	@Override
+	public Stage getStage() {
+		return this.stage;
+	}
+
+	@Override
+	public void setStage(Stage stage) {
+		this.stage = stage;
+	}
+
+
     
     
 
