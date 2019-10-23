@@ -38,11 +38,13 @@ public class FileSystem implements FileSystemInterface{
 		file.setType(type);
 		file.setAttribute(attribute);
 		file.setSize((byte) 1);
-		//TODO 文件初始长度？
+		// 文件初始长度
 		file.setPath(parent.getPath()+"/"+name);
 		byte blockNum = fat.getEmptyLocation();
 		file.setStartBlock(blockNum);
 		fat.setTable(blockNum, FAT.USED);
+		byte[] bh = new byte[64];
+		this.disk.setBlock(blockNum, bh);
 		
 		byte[] currentBlock = this.disk.getBlock(parent.getStartBlock());
 		byte[][] matrix = Utility.reshape(currentBlock);
@@ -67,6 +69,8 @@ public class FileSystem implements FileSystemInterface{
 		byte blockNum = fat.getEmptyLocation();
 		dir.setStartBlock(blockNum);
 		fat.setTable(blockNum, FAT.USED);
+		byte[] bh = new byte[64];
+		this.disk.setBlock(blockNum, bh);
 		
 		byte[] currentBlock = this.disk.getBlock(parent.getStartBlock());
 		byte[][] matrix = Utility.reshape(currentBlock);
@@ -111,7 +115,7 @@ public class FileSystem implements FileSystemInterface{
 	}
 
 	@Override
-	public byte[] open(DirItem item, byte mode) throws Exception{
+	public void open(DirItem item, byte mode) throws Exception{
 		
 		this.checkPath(item);
 		
@@ -130,23 +134,23 @@ public class FileSystem implements FileSystemInterface{
 //				openedFile.set(openedFile.size()+1, item); 
 			}
 		}
-		byte[] data = new byte[item.getSize()*Disk.blockSize];
-		byte blockNum = item.getStartBlock();
-		int idx = 0;
-		byte[] block = disk.getBlock(blockNum);
-		for (byte b : block) {
-			data[idx] = b;
-			idx++;
-		}
-		while(FAT.USED != fat.getLocation(blockNum)) {
-			block = disk.getBlock(blockNum);
-			for (byte b : block) {
-				data[idx] = b;
-				idx++;
-			}
-			blockNum = fat.getLocation(blockNum);
-		}
-		return data;
+//		byte[] data = new byte[item.getSize()*Disk.blockSize];
+//		byte blockNum = item.getStartBlock();
+//		int idx = 0;
+//		byte[] block = disk.getBlock(blockNum);
+//		for (byte b : block) {
+//			data[idx] = b;
+//			idx++;
+//		}
+//		while(FAT.USED != fat.getLocation(blockNum)) {
+//			block = disk.getBlock(blockNum);
+//			for (byte b : block) {
+//				data[idx] = b;
+//				idx++;
+//			}
+//			blockNum = fat.getLocation(blockNum);
+//		}
+//		return data;
 		
 //		if(openedFile.size()==5) {
 //			throw new Exception("仅容许打开5个文件, 但尝试打开更多文件");
@@ -210,6 +214,10 @@ public class FileSystem implements FileSystemInterface{
 			this.open(item, FileSystem.WRITE);
 		}
 		
+		if(buffer == null || buffer.length == 0) {
+			return ;
+		}
+		
 		//计算当前写入所需的盘块数
 		int neededBlocks = buffer.length / Disk.blockSize;
 		if(buffer.length % Disk.blockSize > 0) {
@@ -258,10 +266,8 @@ public class FileSystem implements FileSystemInterface{
 			//FAT标志文件结束
 			fat.setTable(lastBlockNum, FAT.USED);
 			
-			//修改目录项的文件长度
-			item.setSize((byte)(neededBlocks));
 		} else {
-			// TODO 文件内容不变||变短，需释放多余盘块
+			// TODO 文件内容不变 || 变短，需释放多余盘块
 			blockNum = item.getStartBlock();
 			for(int i = 0; i < neededBlocks-1; i++) {
 				dividedBlock = Arrays.copyOfRange(buffer, i*Disk.blockSize, (i+1)*Disk.blockSize);
@@ -277,6 +283,9 @@ public class FileSystem implements FileSystemInterface{
 				fat.release(releseBlockNum);
 			}
 		}
+		
+		//修改目录项的文件长度
+		item.setSize((byte)(neededBlocks));
 		
 //		//获取当前的末尾盘块号
 //		byte blockNum = item.getStartBlock();
@@ -320,7 +329,7 @@ public class FileSystem implements FileSystemInterface{
 			throw new Exception("不能以写方式打开");
 		}
 		
-		//检查是否打开，否则打开
+		//检查是否打开,否则打开
 		if(!isOpen(item)) {
 			this.open(item, mode);
 		}
@@ -356,7 +365,7 @@ public class FileSystem implements FileSystemInterface{
 		if(this.isOpen(item)) {
 			throw new Exception("文件已打开");
 		}
-		if(Utility.countValidItem(this.getFileTree(item), this) > 0) {
+		if((item.getAttribute() & DirItem.DIR) > 0 && Utility.countValidItem(this.getFileTree(item), this) > 0) {
 			throw new Exception("只能删除空目录");
 		}
 		

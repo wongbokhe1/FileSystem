@@ -76,7 +76,7 @@ public class NotepadTab extends Tab {
 	}
 	
 	public void save() {
-		//TODO 保存文件 -> 写入
+		//  保存文件 -> 写入
 		byte[] text = this.textArea.getText().getBytes();
 		try {
 			((FileSystemController)RootController.controllers.get("controller.FileSystemController")).getFileSystem().write(this.dirItem, text);

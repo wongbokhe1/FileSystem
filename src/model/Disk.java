@@ -11,6 +11,7 @@ public class Disk {
 	public Disk() {
 		for (int i = 0; i < this.totalBlock; i++) {
             storageBlocks[i] = new byte[this.blockSize];
+            
         }
 	}
 	

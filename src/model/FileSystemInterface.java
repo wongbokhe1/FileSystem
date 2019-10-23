@@ -12,7 +12,7 @@ public interface FileSystemInterface {
 	public DirItem createFile(String name, String type, byte attribute, DirItem paretent, int index) throws Exception;
 	public DirItem createDir(String name, byte attribute, DirItem paretent, int index) throws Exception;
 	public void deleteDir(DirItem item) throws Exception;
-	public byte[] open(DirItem item, byte mode) throws Exception;
+	public void open(DirItem item, byte mode) throws Exception;
 	public void close(DirItem item, byte[] buffer) throws Exception;
 	public byte[] read(DirItem item, byte mode) throws Exception;
 	public void write(DirItem item, byte[] buffer) throws Exception;
