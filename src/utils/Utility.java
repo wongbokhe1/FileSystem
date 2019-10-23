@@ -1,6 +1,11 @@
 package utils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.sun.jndi.url.iiopname.iiopnameURLContextFactory;
 import com.sun.org.apache.bcel.internal.generic.NEW;
@@ -15,7 +20,7 @@ import model.FileSystem;
 public class Utility {
 	public static void genTreeView(TreeView<DirItem> treeView, FileSystem fileSys) throws Exception {
 		byte[] val = new byte[] {'/', 0,0,0,0,8,2,0};
-		TreeItem<DirItem> treeRoot = new TreeItem<DirItem>(new DirItem(val, "/", (byte)2, (byte)0));
+		TreeItem<DirItem> treeRoot = new TreeItem<DirItem>(new DirItem(val, "", (byte)2, (byte)0));
 		treeView.setRoot(treeRoot);
 		DirItem[] rootItems = fileSys.getFileTree();
 		for (DirItem dirItem : rootItems) {
@@ -86,5 +91,44 @@ public class Utility {
 		}
 		return rnt;
 	}
+	
+	public static TreeItem<DirItem> getTreeItem(String s, TreeView<DirItem> treeView) throws Exception {
+		List<String> paths = Utility.parsePath(s);
+		TreeItem<DirItem> treeItem = treeView.getRoot();
+		TreeItem<DirItem> current = treeItem;
+		Iterator<String> sIter = paths.iterator();
+		while(sIter.hasNext()) {
+			String name = sIter.next();
+			Iterator<TreeItem<DirItem>> itemIter = current.getChildren().iterator();
+			while (itemIter.hasNext()) {
+				TreeItem<DirItem> item = itemIter.next();
+				if(item.getValue().getName().trim().equals(name)) {
+					current = item;
+				}
+				
+			}
+		}
+		return current;
+		
+	}
+	
+	/**
+	 * 用于解析路径, 将每一个文件夹名按序存放在数组中返回
+	 * 例: "/aaa/bbb/" 或 "//aaa//bbb" 都返回: ["aaa", "bbb"]  
+	 * @param path
+	 * @return 路径名数组
+	 */
+	public static List<String> parsePath(String path) {
+		String[] paths = path.split("/");
+		List<String> pathList = new ArrayList<String>();
+		for (String string : paths) {
+			pathList.add(string);
+		}
+		Stream<String> stream = pathList.stream();
+		pathList = stream.filter(element->(element.length() != 0)).collect(Collectors.toList());
+		return pathList;
+
+	}
+
 
 }

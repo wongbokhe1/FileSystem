@@ -2,12 +2,13 @@ package controller;
 
 import java.net.URL;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -31,31 +32,27 @@ import model.FileLabel;
 import model.FileSystem;
 import utils.Utility;
 
+public class FileSystemController extends RootController {
 
-public class FileSystemController extends RootController{
+	@FXML
+	private TreeView<DirItem> treeView;
 
-    @FXML
-    private TreeView<DirItem> treeView;
-    
-    private Stage stage;
+	private Stage stage;
 
-    @FXML
-    private FlowPane flowPane;
-    
+	@FXML
+	private FlowPane flowPane;
+
 	private FileSystem fileSystem;
-	
+
 	private ContextMenu flowpaneMenu;
-	
+
 	private NotepadController notepadController;
-	
+
 	private String currentPath;
-
-    
-
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		
+
 		this.fileSystem = new FileSystem();
 		// TODO Auto-generated method stub
 		try {
@@ -66,12 +63,12 @@ public class FileSystemController extends RootController{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
-	
-    public void createDir() {
-    	DirItem[] itemList;
-    	DirItem parentDir;
+
+	public void createDir() {
+		DirItem[] itemList;
+		DirItem parentDir;
 		try {
 			parentDir = this.treeView.getSelectionModel().getSelectedItem().getValue();
 			itemList = fileSystem.getFileTree(parentDir);
@@ -81,36 +78,34 @@ public class FileSystemController extends RootController{
 				errorAlert.setContentText("超过目录项上限");
 				errorAlert.setHeaderText(null);
 			}
-			
 
-			
-			for(int i = 0; i<itemList.length; i++) {
-				if(itemList[i].getAttribute() == 0) {
+			for (int i = 0; i < itemList.length; i++) {
+				if (itemList[i].getAttribute() == 0) {
 					TextInputDialog dialog = new TextInputDialog("新建文件夹");
 					dialog.setTitle("新建文件夹");
 					dialog.setHeaderText(String.format("在%s目录新建文件夹", parentDir.getPath()));
 					dialog.setContentText("文件夹名: ");
 					Optional<String> res = dialog.showAndWait();
-					if(res.isPresent()) {
+					if (res.isPresent()) {
 						fileSystem.createDir(res.get(), DirItem.DIR, parentDir, i);
 					}
 					break;
 				}
 			}
-			this.refreshTreeView();
+			this.refreshTreeView(parentDir.getPath());
 		} catch (Exception e) {
 			Alert errorAlert = new Alert(AlertType.ERROR);
 			errorAlert.setTitle("error");
 			errorAlert.setHeaderText(null);
 			errorAlert.setContentText(e.getMessage());
 			errorAlert.showAndWait();
-			
+
 		}
-    }
-    
-    void createFile() {
-    	DirItem[] itemList;
-    	DirItem parentDir;
+	}
+
+	public void createFile() {
+		DirItem[] itemList;
+		DirItem parentDir;
 		try {
 			parentDir = this.treeView.getSelectionModel().getSelectedItem().getValue();
 			itemList = fileSystem.getFileTree(parentDir);
@@ -120,23 +115,21 @@ public class FileSystemController extends RootController{
 				errorAlert.setContentText("超过目录项上限");
 				errorAlert.setHeaderText(null);
 			}
-			
 
-			
-			for(int i = 0; i<itemList.length; i++) {
-				if(itemList[i].getAttribute() == 0) {
+			for (int i = 0; i < itemList.length; i++) {
+				if (itemList[i].getAttribute() == 0) {
 					TextInputDialog dialog = new TextInputDialog("新建文件");
 					dialog.setTitle("新建文件");
 					dialog.setHeaderText(String.format("在%s目录新建文件夹", parentDir.getPath()));
 					dialog.setContentText("文件夹名: ");
 					Optional<String> res = dialog.showAndWait();
-					if(res.isPresent()) {
+					if (res.isPresent()) {
 						fileSystem.createFile(res.get(), "tx", DirItem.FILE, parentDir, i);
 					}
 					break;
 				}
 			}
-			this.refreshTreeView();
+			this.refreshTreeView(parentDir.getPath());
 		} catch (Exception e) {
 			Alert errorAlert = new Alert(AlertType.ERROR);
 			errorAlert.setTitle("error");
@@ -144,37 +137,41 @@ public class FileSystemController extends RootController{
 			errorAlert.setContentText(e.getMessage());
 			e.printStackTrace();
 			errorAlert.showAndWait();
-			
+
 		}
-    }
-    
-    public void refreshTreeView() {
-    	try {
+	}
+
+	public void refreshTreeView(String targetPath) {
+		try {
 			Utility.genTreeView(this.treeView, this.fileSystem);
+			if(targetPath != null) {
+				TreeItem<DirItem> targetTreeItem = Utility.getTreeItem(targetPath, this.treeView);
+				this.treeView.getSelectionModel().select(targetTreeItem);
+			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-    }
-    
-    private void initListener() {
-    	treeView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TreeItem<DirItem>>() {
+	}
+
+	private void initListener() {
+		treeView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TreeItem<DirItem>>() {
 
 			@Override
 			public void changed(ObservableValue<? extends TreeItem<DirItem>> observable, TreeItem<DirItem> oldValue,
 					TreeItem<DirItem> newValue) {
 				FileSystemController.this.flowPane.getChildren().clear();
-				if(newValue==null) {
+				if (newValue == null) {
 					return;
 				}
-				
+
 				FileSystemController.this.currentPath = newValue.getValue().getPath();
 				System.out.println(FileSystemController.this.currentPath);
-				
+
 				try {
 					DirItem[] items = FileSystemController.this.fileSystem.getFileTree(newValue.getValue());
 					for (DirItem dirItem : items) {
-						if(Utility.validItem(dirItem, FileSystemController.this.fileSystem)) {
+						if (Utility.validItem(dirItem, FileSystemController.this.fileSystem)) {
 							FileLabel fileLabel = new FileLabel(dirItem);
 							ContextMenu menu = new ContextMenu();
 							MenuItem modifyItem = new MenuItem("修改属性/重命名");
@@ -186,7 +183,7 @@ public class FileSystemController extends RootController{
 									super.handle(event);
 									// TODO modify attribute/name
 								}
-								
+
 							});
 							deleteItem.setOnAction(new RightClickHandler(fileLabel) {
 
@@ -195,7 +192,7 @@ public class FileSystemController extends RootController{
 									super.handle(event);
 									try {
 										FileSystemController.this.fileSystem.delete(fileLabel.getDirItem());
-										FileSystemController.this.refreshTreeView();
+										FileSystemController.this.refreshTreeView(FileSystemController.this.treeView.getSelectionModel().getSelectedItem().getValue().getPath());
 									} catch (Exception e) {
 										Alert errorAlert = new Alert(AlertType.ERROR);
 										errorAlert.setTitle("error");
@@ -205,27 +202,40 @@ public class FileSystemController extends RootController{
 										errorAlert.showAndWait();
 									}
 								}
-								
+
 							});
-							menu.getItems().addAll(new MenuItem [] {modifyItem, deleteItem});
+							menu.getItems().addAll(new MenuItem[] { modifyItem, deleteItem });
 							fileLabel.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
 								@Override
 								public void handle(MouseEvent event) {
 									if (event.getClickCount() == 2 && event.getButton() == MouseButton.PRIMARY) {
 										// 双击打开事件
 										// TODO 打开编辑窗口
-										FileLabel f = (FileLabel)event.getSource();
+										FileLabel f = (FileLabel) event.getSource();
+										
+										if((f.getDirItem().getAttribute() & DirItem.DIR)>0) {
+											String path = f.getDirItem().getPath();
+											try {
+												TreeItem<DirItem> tmp = Utility.getTreeItem(path, FileSystemController.this.treeView);
+												FileSystemController.this.treeView.getSelectionModel().select(tmp);
+											} catch (Exception e) {
+												// TODO Auto-generated catch block
+												e.printStackTrace();
+											}
+										}
+										
+										
 										System.out.println("file opened: " + f);
-									} else if(event.getButton() == MouseButton.SECONDARY) {
-										menu.show(FileSystemController.this.flowPane, event.getScreenX(), event.getScreenY());
+									} else if (event.getButton() == MouseButton.SECONDARY) {
+										menu.show(FileSystemController.this.flowPane, event.getScreenX(),
+												event.getScreenY());
 										event.consume();
-									} else if(event.getButton() == MouseButton.PRIMARY && menu.isShowing()){
+									} else if (event.getButton() == MouseButton.PRIMARY && menu.isShowing()) {
 										menu.hide();
 									}
 								}
 							});
-							
-							
+
 							FileSystemController.this.flowPane.getChildren().add(fileLabel);
 						}
 					}
@@ -233,19 +243,17 @@ public class FileSystemController extends RootController{
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
-				
+
 			}
 
-    		
-    	});
-    }
-    
-    public void initHandler() {
-    	addFlowPaneHandler();
-    }
-    
-    public void addFlowPaneHandler() {
+		});
+	}
+
+	public void initHandler() {
+		addFlowPaneHandler();
+	}
+
+	public void addFlowPaneHandler() {
 		ContextMenu menu = new ContextMenu();
 		MenuItem createFile = new MenuItem("新建文件");
 		MenuItem createDir = new MenuItem("新建文件夹");
@@ -262,27 +270,26 @@ public class FileSystemController extends RootController{
 				FileSystemController.this.createDir();
 			}
 		});
-		menu.getItems().addAll(new MenuItem[] {createFile, createDir} );
-		
+		menu.getItems().addAll(new MenuItem[] { createFile, createDir });
+
 		this.flowpaneMenu = menu;
-		
-    	this.flowPane.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+
+		this.flowPane.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
 
 			@Override
 			public void handle(MouseEvent event) {
-				if(event.getButton() == MouseButton.SECONDARY && FileSystemController.this.treeView.getSelectionModel().getSelectedItem() != null) {
-					FileSystemController.this.flowpaneMenu.show(FileSystemController.this.flowPane, event.getScreenX(), event.getScreenY());
-				}
-				else if(event.getButton() == MouseButton.PRIMARY || FileSystemController.this.flowpaneMenu.isShowing()){
+				if (event.getButton() == MouseButton.SECONDARY
+						&& FileSystemController.this.treeView.getSelectionModel().getSelectedItem() != null) {
+					FileSystemController.this.flowpaneMenu.show(FileSystemController.this.flowPane, event.getScreenX(),
+							event.getScreenY());
+				} else if (event.getButton() == MouseButton.PRIMARY
+						|| FileSystemController.this.flowpaneMenu.isShowing()) {
 					FileSystemController.this.flowpaneMenu.hide();
 				}
 			}
 		});
-    	
-    	
-    }
-    
 
+	}
 
 	@Override
 	public Stage getStage() {
@@ -294,33 +301,21 @@ public class FileSystemController extends RootController{
 		this.stage = stage;
 	}
 
-
-    
-    
-
 }
 
 class RightClickHandler implements EventHandler<ActionEvent> {
-	
+
 	private FileLabel fileLable;
-	
-	
-	
+
 	public RightClickHandler(FileLabel fileLable) {
 		super();
 		this.fileLable = fileLable;
 	}
 
-
-
 	@Override
 	public void handle(ActionEvent event) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
-
-
-
-	
 }

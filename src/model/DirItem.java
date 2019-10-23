@@ -14,11 +14,16 @@ public class DirItem implements DirItemInterface {
 	
 	public DirItem(byte[] values, String path, byte currentBlock, byte index) throws Exception {
 		this.values = values;
-		if("/".equals(path)) {
-			this.path = "/" + this.getName().trim();
+		if("".equals(path)) {
+			this.path = this.getName().trim();
 		}
 		else {
-			this.path = path + "/" + this.getName().trim();
+			if((this.getAttribute()&DirItem.DIR)>0) {
+				this.path = path + this.getName().trim() + "/";
+			}else {
+				this.path = path + this.getName().trim();
+			}
+			
 		}
 		this.currentBlock = currentBlock;
 		this.index = index;
