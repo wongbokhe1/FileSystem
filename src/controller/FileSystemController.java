@@ -17,6 +17,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextInputDialog;
@@ -162,22 +163,53 @@ public class FileSystemController extends RootController {
 				System.out.println(FileSystemController.this.currentPath);
 
 				try {
-//					FileSystemController.this.flowPane.getChildren().clear();
 					DirItem[] items = FileSystemController.this.fileSystem.getFileTree(newValue.getValue());
 					for (DirItem dirItem : items) {
 						if (Utility.validItem(dirItem, FileSystemController.this.fileSystem)) {
 							FileLabel fileLabel = new FileLabel(dirItem);
-							fileLabel.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+							ContextMenu menu = new ContextMenu();
+							MenuItem modifyItem = new MenuItem("修改属性/重命名");
+							MenuItem deleteItem = new MenuItem("删除");
+							modifyItem.setOnAction(new RightClickHandler(fileLabel) {
 
 								@Override
+								public void handle(ActionEvent event) {
+									super.handle(event);
+									// TODO modify attribute/name
+								}
+								
+							});
+							deleteItem.setOnAction(new RightClickHandler(fileLabel) {
+
+								@Override
+								public void handle(ActionEvent event) {
+									super.handle(event);
+									try {
+										FileSystemController.this.fileSystem.delete(fileLabel.getDirItem());
+										FileSystemController.this.refreshTreeView();
+									} catch (Exception e) {
+										Alert errorAlert = new Alert(AlertType.ERROR);
+										errorAlert.setTitle("error");
+										errorAlert.setHeaderText(null);
+										errorAlert.setContentText(e.getMessage());
+										e.printStackTrace();
+										errorAlert.showAndWait();
+									}
+								}
+								
+							});
+							menu.getItems().addAll(new MenuItem [] {modifyItem, deleteItem});
+							fileLabel.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+								@Override
 								public void handle(MouseEvent event) {
-									if (event.getClickCount() >= 2 && event.getButton() == MouseButton.PRIMARY) {
+									if (event.getClickCount() == 2 && event.getButton() == MouseButton.PRIMARY) {
 										// 双击打开事件
 										FileLabel f = (FileLabel) event.getSource();
 										System.out.println("file opened: " + f);
 
 										// 打开文件
 										if ((f.getDirItem().getAttribute() & DirItem.FILE) > 0) {
+											//编辑窗口置顶
 //											RootController.controllers.get("controller.NotepadController").getStage().setAlwaysOnTop(true);
 											// 打开编辑窗口
 											if (!RootController.controllers.get("controller.NotepadController").getStage().isShowing()) {
@@ -191,6 +223,11 @@ public class FileSystemController extends RootController {
 										if ((f.getDirItem().getAttribute() & DirItem.DIR) > 0) {
 											// TODO 双击打开目录
 										}
+									} else if(event.getButton() == MouseButton.SECONDARY) {
+										menu.show(FileSystemController.this.flowPane, event.getScreenX(), event.getScreenY());
+										event.consume();
+									} else if(event.getButton() == MouseButton.PRIMARY && menu.isShowing()){
+										menu.hide();
 									}
 
 								}
@@ -248,8 +285,10 @@ public class FileSystemController extends RootController {
 				}
 			}
 		});
-
-	}
+    	
+    	
+    }
+    
 
 	@Override
 	public Stage getStage() {
@@ -273,4 +312,29 @@ public class FileSystemController extends RootController {
 		return fileSystem;
 	}
 
+}
+
+class RightClickHandler implements EventHandler<ActionEvent> {
+	
+	private FileLabel fileLable;
+	
+	
+	
+	public RightClickHandler(FileLabel fileLable) {
+		super();
+		this.fileLable = fileLable;
+	}
+
+
+
+	@Override
+	public void handle(ActionEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+
+
+	
 }
