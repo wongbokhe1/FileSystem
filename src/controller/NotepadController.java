@@ -50,7 +50,9 @@ public class NotepadController extends RootController {
 		}
 	}
 	
-	
+	public void removeTab(NotepadTab notepadTab) {
+		this.tabPane.getTabs().remove(notepadTab);
+	}
 	
 	@Override
 	public Stage getStage() {
@@ -74,6 +76,14 @@ public class NotepadController extends RootController {
 				openNotepadTabs.clear();
 			}
 		});
+	}
+
+	public TabPane getTabPane() {
+		return tabPane;
+	}
+
+	public void setTabPane(TabPane tabPane) {
+		this.tabPane = tabPane;
 	}
 
 }
