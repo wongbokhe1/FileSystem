@@ -80,6 +80,8 @@ public class NotepadTab extends Tab {
 		byte[] text = this.textArea.getText().getBytes();
 		try {
 			((FileSystemController)RootController.controllers.get("controller.FileSystemController")).getFileSystem().write(this.dirItem, text);
+			((FileSystemController)RootController.controllers.get("controller.FileSystemController")).upDateDiskUsingTable();
+			((FileSystemController)RootController.controllers.get("controller.FileSystemController")).upDateFATTable();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

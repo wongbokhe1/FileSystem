@@ -365,8 +365,8 @@ public class FileSystem implements FileSystemInterface{
 		//删除父级目录项
 		byte parentBlock = this.getParentBlock(item);
 		byte inblockIndex = item.getIndex();
-		item.setAttribute((byte)0);
-		item.setStartBlock((byte)0);
+		byte[] tmp = new byte[] {0,0,0,0,0,0,0,0};
+		item.setValues(tmp);
 		byte[] block = disk.getBlock(parentBlock);
 		byte[][] matrix = Utility.reshape(block);
 		matrix[inblockIndex] = item.getValues();
@@ -430,10 +430,13 @@ public class FileSystem implements FileSystemInterface{
 	
 	public byte getParentBlock(DirItem item) throws Exception {
 		List<String> dirList = FileSystem.parsePath(item.getPath());
+		if(dirList.size() == 1) {
+			return 2;
+		}
 		dirList.remove(dirList.size()-1);
 		DirItem[] current = this.getFileTree();
 		Iterator<String> iter = dirList.iterator();
-		byte block;
+		byte block = 0;
 		while(iter.hasNext()) {
 			String name = iter.next();
 			for (DirItem dirItem : current) {
@@ -444,7 +447,7 @@ public class FileSystem implements FileSystemInterface{
 				}
 			}
 		}
-		return 0;
+		return block;
 		
 	}
 	

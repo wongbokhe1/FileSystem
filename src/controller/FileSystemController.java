@@ -16,6 +16,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -65,10 +66,11 @@ public class FileSystemController extends RootController {
 	private String currentPath;
 	
 	private PieChart.Data usedDisk;
+	
 	private PieChart.Data noUsedDisk;
 
-	private double uesd = 0;
-	private double noUesd = 1;
+	private double used = 0;
+	private double noUsed = 1;
 	
 	@FXML
 	private PieChart diskUsingPieChart;
@@ -87,22 +89,24 @@ public class FileSystemController extends RootController {
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-
 		this.initDiskUsingTable();
 		this.initDiskUsingPieChart();
 		this.initFATTable();
+		
 		
 		this.fileSystem = new FileSystem();
 		// TODO Auto-generated method stub
 		try {
 			Utility.genTreeView(this.treeView, this.fileSystem);
+			this.treeView.getSelectionModel().select(this.treeView.getRoot());
 			this.initListener();
 			this.initHandler();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		this.upDateDiskUsingTable();
+		this.upDateFATTable();
 	}
 
 	public void createDir() {
@@ -187,6 +191,8 @@ public class FileSystemController extends RootController {
 	public void refreshTreeView(String targetPath) {
 		try {
 			Utility.genTreeView(this.treeView, this.fileSystem);
+			this.upDateDiskUsingTable();
+			this.upDateFATTable();
 			if(targetPath != null) {
 				TreeItem<DirItem> targetTreeItem = Utility.getTreeItem(targetPath, this.treeView);
 				this.treeView.getSelectionModel().select(targetTreeItem);
@@ -349,34 +355,38 @@ public class FileSystemController extends RootController {
 			Text diskBlock = new Text(String.valueOf(i));
 			StackPane stackPane = new StackPane();
 			stackPane.getChildren().add(diskBlock);
-			stackPane.setStyle("-fx-background-color: #DDDDDD");
+			stackPane.setStyle("-fx-background-color: #46e145");
 			this.diskUsingTableBlocks.add(stackPane);
 			this.diskUsingTable.add(stackPane, i%8, i/8);
 		}
 	}
 	
+	
 	public void upDateDiskUsingTable() {
+		this.used = 0;
+		this.noUsed = 0;
 		for (int i = 0; i < Disk.totalBlock; i++) {
 			if(this.fileSystem.getFat().getLocation((byte) i) != FAT.EMPTY) {
 				this.diskUsingTableBlocks.get(i).setStyle("-fx-background-color: #FF3333");
-				this.uesd++;
+				this.used++;
 			}else {
 				this.diskUsingTableBlocks.get(i).setStyle("-fx-background-color: #DDDDDD");
-				this.noUesd--;
+				this.noUsed--;
 			}
 		}
+		upDateDiskUsingPieChart();
 	}
 	
 	private void initDiskUsingPieChart() {
-		this.usedDisk = new PieChart.Data("已使用", this.uesd);
-		this.noUsedDisk = new PieChart.Data("未使用", this.noUesd);
+		this.usedDisk = new PieChart.Data("已使用", this.used);
+		this.noUsedDisk = new PieChart.Data("未使用", this.noUsed);
 		this.pieChartData = FXCollections.observableArrayList(this.usedDisk, this.noUsedDisk);
 		this.diskUsingPieChart.setData(this.pieChartData);
 	}
 	
 	public void upDateDiskUsingPieChart() {
-		this.usedDisk.setPieValue(this.uesd);
-		this.noUsedDisk.setPieValue(this.noUesd);
+		this.usedDisk.setPieValue(this.used);
+		this.noUsedDisk.setPieValue(this.noUsed);
 	}
 	
 	private void initFATTable() {
@@ -454,5 +464,7 @@ class RightClickHandler implements EventHandler<ActionEvent> {
 		// TODO Auto-generated method stub
 
 	}
+	
+	
 
 }

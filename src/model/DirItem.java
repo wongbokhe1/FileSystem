@@ -34,6 +34,10 @@ public class DirItem implements DirItemInterface {
 	}
 	
 	
+	public void setValues(byte[] values) {
+		this.values = values;
+	}
+
 	@Override
 	public byte getAttribute() {
 		return this.values[5];
