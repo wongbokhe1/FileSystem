@@ -286,6 +286,14 @@ public class FileSystem implements FileSystemInterface{
 		
 		//修改目录项的文件长度
 		item.setSize((byte)(neededBlocks));
+		byte parentBlock = item.getCurrentBlock();
+		byte inblockIndex = item.getIndex();
+		byte[] block = disk.getBlock(parentBlock);
+		byte[][] matrix = Utility.reshape(block);
+		matrix[inblockIndex] = item.getValues();
+		block = Utility.flatten(matrix);
+		this.disk.setBlock(parentBlock, block);
+		
 		
 //		//获取当前的末尾盘块号
 //		byte blockNum = item.getStartBlock();
@@ -372,7 +380,7 @@ public class FileSystem implements FileSystemInterface{
 		//修改FAT，归还磁盘空间
 		fat.release(item.getStartBlock());
 		//删除父级目录项
-		byte parentBlock = this.getParentBlock(item);
+		byte parentBlock = item.getCurrentBlock();
 		byte inblockIndex = item.getIndex();
 		byte[] tmp = new byte[] {0,0,0,0,0,0,0,0};
 		item.setValues(tmp);
@@ -437,6 +445,7 @@ public class FileSystem implements FileSystemInterface{
 		
 	}
 	
+	@Deprecated
 	public byte getParentBlock(DirItem item) throws Exception {
 		List<String> dirList = FileSystem.parsePath(item.getPath());
 		if(dirList.size() == 1) {
