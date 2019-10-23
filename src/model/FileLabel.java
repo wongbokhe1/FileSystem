@@ -18,7 +18,7 @@ public class FileLabel extends Label {
 	public FileLabel(DirItem dirItem) throws MalformedURLException {
 		this.dirItem = dirItem;
 		if (dirItem.getAttribute() == DirItem.FILE) {
-			// TODO 判断文件/目录
+			// 判断文件/目录
 			this.image = new Image(Main.class.getResourceAsStream("/view/file.png"), 85, 85, true, true);
 		} else {
 			this.image = new Image(Main.class.getResourceAsStream("/view/folder.png"), 85, 85, true, true);
@@ -26,7 +26,7 @@ public class FileLabel extends Label {
 		this.imageView = new ImageView(this.image);
 		super.setGraphic(this.imageView);
 		try {
-			super.setText(this.dirItem.getName());
+			super.setText(this.dirItem.toString());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

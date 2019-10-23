@@ -23,14 +23,25 @@ public class NotepadTab extends Tab {
 		this.initTextArea();
 		this.borderPane.setPadding(new Insets(3, 3, 3, 3));
 		super.setContent(this.borderPane);
+		try {
+			setText(dirItem.getName());
+			setClosable(true);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	private void initTextArea() {
-		byte[] text;
+		this.textArea = new TextArea();
 		try {
-			text = ((FileSystemController)RootController.controllers.get("contrller.FileSystemController")).getFileSystem().read(this.dirItem, FileSystem.WRITE);
+			byte[] text = ((FileSystemController)RootController.controllers.get("controller.FileSystemController")).getFileSystem().read(this.dirItem, FileSystem.WRITE);
 			String textString = new String(text);
-			this.textArea.setText(textString);
+			if(textString != null && textString.length() != 0) {
+				this.textArea.setText(textString);
+			} else {
+				this.textArea.setText(" ");
+			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -46,19 +57,33 @@ public class NotepadTab extends Tab {
 	    MenuItem quit = new MenuItem("退出");
 	    
 	    save.setOnAction(event ->{
-	    	//TODO 保存
+	    	this.save();
 	    });
 
 	    saveAndQuit.setOnAction(event ->{
-	    	//TODO 保存并退出
+	    	this.save();
+	    	this.quit();
 	    });
 	    
 	    quit.setOnAction(event ->{
-	    	//TODO 退出
+	    	this.quit();
 	    });
 	    
 	    fileMenu.getItems().addAll(save,saveAndQuit,quit);
 	    this.menuBar.getMenus().add(fileMenu);
 	    this.borderPane.setTop(this.menuBar);
+	}
+	
+	public void save() {
+		//TODO 保存文件 -> 写入
+	}
+	
+	public void quit() {
+		try {
+			((FileSystemController)RootController.controllers.get("controller.FileSystemController")).getFileSystem().close(this.dirItem, null);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

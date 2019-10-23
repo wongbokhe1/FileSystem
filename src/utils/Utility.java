@@ -32,7 +32,6 @@ public class Utility {
 			genTreeItem(dirItem, fileSys);
 		}
 		
-		
 	}
 	
 	public static void genTreeItem(TreeItem<DirItem> root, FileSystem fileSys) throws Exception {
