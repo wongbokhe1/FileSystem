@@ -25,7 +25,6 @@ public class FileSystem implements FileSystemInterface{
 	public FileSystem() {
 		this.fat = new FAT();
 		this.disk = new Disk();
-		
 	}
 	
 
@@ -45,7 +44,8 @@ public class FileSystem implements FileSystemInterface{
 		file.setName(name);
 		file.setType(type);
 		file.setAttribute(attribute);
-		file.setSize((byte) 0);
+		file.setSize((byte) 1);
+		//TODO 文件初始长度？
 		file.setPath(parent.getPath()+"/"+name);
 		byte blockNum = fat.getEmptyLocation();
 		file.setStartBlock(blockNum);
@@ -127,30 +127,84 @@ public class FileSystem implements FileSystemInterface{
 			throw new Exception("不能以写方式打开只读文件");
 		}
 		
-		for(int i = 0; i<5; i++) {
-			if(openedFile.get(i) == null) {
+		// 检查是否已打开
+		if(!this.isOpen(item)) {
+			if(openedFile.size()==5) {
+				throw new Exception("仅容许打开5个文件, 但尝试打开更多文件");
+			}else {
 				item.setMode(mode);
-				openedFile.set(i, item); 
-				byte[] data = new byte[item.getSize()];
-				byte blockNum = item.getStartBlock();
-				int idx = 0;
-				byte[] block = disk.getBlock(blockNum);
-				for (byte b : block) {
-					data[idx] = b;
-					idx++;
-				}
-				while(FAT.USED != fat.getLocation(blockNum)) {
-					block = disk.getBlock(blockNum);
-					for (byte b : block) {
-						data[idx] = b;
-						idx++;
-					}
-					blockNum = fat.getLocation(blockNum);
-				}
-				return data;
+				openedFile.add(item);
+//				openedFile.set(openedFile.size()+1, item); 
 			}
 		}
-		throw new Exception("仅容许打开5个文件, 但尝试打开更多文件");
+		byte[] data = new byte[item.getSize()*Disk.blockSize];
+		byte blockNum = item.getStartBlock();
+		int idx = 0;
+		byte[] block = disk.getBlock(blockNum);
+		for (byte b : block) {
+			data[idx] = b;
+			idx++;
+		}
+		while(FAT.USED != fat.getLocation(blockNum)) {
+			block = disk.getBlock(blockNum);
+			for (byte b : block) {
+				data[idx] = b;
+				idx++;
+			}
+			blockNum = fat.getLocation(blockNum);
+		}
+		return data;
+		
+//		if(openedFile.size()==5) {
+//			throw new Exception("仅容许打开5个文件, 但尝试打开更多文件");
+//		}else {
+//			item.setMode(mode);
+//			openedFile.add(item);
+////			openedFile.set(openedFile.size()+1, item); 
+//			
+//			byte[] data = new byte[item.getSize()*Disk.blockSize];
+//			byte blockNum = item.getStartBlock();
+//			int idx = 0;
+//			byte[] block = disk.getBlock(blockNum);
+//			for (byte b : block) {
+//				data[idx] = b;
+//				idx++;
+//			}
+//			while(FAT.USED != fat.getLocation(blockNum)) {
+//				block = disk.getBlock(blockNum);
+//				for (byte b : block) {
+//					data[idx] = b;
+//					idx++;
+//				}
+//				blockNum = fat.getLocation(blockNum);
+//			}
+//			return data;
+//		}
+		
+//		for(int i = 0; i<5; i++) {
+//			if(openedFile.get(i) == null) {
+//				item.setMode(mode);
+//				openedFile.set(i, item); 
+//				byte[] data = new byte[item.getSize()];
+//				byte blockNum = item.getStartBlock();
+//				int idx = 0;
+//				byte[] block = disk.getBlock(blockNum);
+//				for (byte b : block) {
+//					data[idx] = b;
+//					idx++;
+//				}
+//				while(FAT.USED != fat.getLocation(blockNum)) {
+//					block = disk.getBlock(blockNum);
+//					for (byte b : block) {
+//						data[idx] = b;
+//						idx++;
+//					}
+//					blockNum = fat.getLocation(blockNum);
+//				}
+//				return data;
+//			}
+//		}
+//		throw new Exception("仅容许打开5个文件, 但尝试打开更多文件");
 		
 		
 	}
@@ -206,7 +260,7 @@ public class FileSystem implements FileSystemInterface{
 	@Override
 	public byte[] read(DirItem item, byte mode) throws Exception {
 		//检查是否以写方式打开，是则不允许读
-		if(mode == FileSystem.WRITE) {
+		if((item.getAttribute() & DirItem.READONLY )> 0 && mode == FileSystem.WRITE ) {
 			throw new Exception("不能以写方式打开");
 		}
 		
@@ -215,7 +269,7 @@ public class FileSystem implements FileSystemInterface{
 			this.open(item, mode);
 		}
 		
-		byte[] data = new byte[item.getSize()];
+		byte[] data = new byte[item.getSize()*Disk.blockSize];
 		byte blockNum = item.getStartBlock();
 		int idx = 0;
 		byte[] block = disk.getBlock(blockNum);
@@ -371,7 +425,8 @@ public class FileSystem implements FileSystemInterface{
 		}
 		int idx = this.openedFile.indexOf(item);
 		this.openedFile.get(idx).setMode(FileSystem.CLOSED);//
-		this.openedFile.set(idx, null);
+//		this.openedFile.set(idx, null);
+		this.openedFile.remove(item);
 	}
 
 	public FAT getFat() {
@@ -402,7 +457,7 @@ public class FileSystem implements FileSystemInterface{
 	 * 检查某目录/路径是否存在
 	 */
 	private boolean checkPath(DirItem item) throws Exception {
-		//TODO 
+		//TODO 检查某目录/路径是否存在
 //		String path = item.getPath();
 //		if() {
 //			throw new Exception("目录不存在");
@@ -414,7 +469,7 @@ public class FileSystem implements FileSystemInterface{
 	 * 检查某目录/路径是否存在
 	 */
 	private boolean checkPath(String path) throws Exception {
-		//TODO 
+		//TODO 检查某目录/路径是否存在
 //		if() {
 //			throw new Exception("目录不存在");
 //		}
@@ -438,7 +493,7 @@ public class FileSystem implements FileSystemInterface{
 	/**
 	 * 检查文件是否已打开
 	 */
-	private boolean isOpen(DirItem item) {
+	public boolean isOpen(DirItem item) {
 		int idx = openedFile.indexOf(item);
 		if(idx != -1) {
 			return true;

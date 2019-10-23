@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
+
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -27,6 +29,7 @@ import javafx.scene.control.TreeView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import model.DirItem;
 import model.FileLabel;
 import model.FileSystem;
@@ -34,10 +37,12 @@ import utils.Utility;
 
 public class FileSystemController extends RootController {
 
+
 	@FXML
 	private TreeView<DirItem> treeView;
 
 	private Stage stage;
+
 
 	@FXML
 	private FlowPane flowPane;
@@ -47,6 +52,7 @@ public class FileSystemController extends RootController {
 	private ContextMenu flowpaneMenu;
 
 	private NotepadController notepadController;
+
 
 	private String currentPath;
 
@@ -83,7 +89,7 @@ public class FileSystemController extends RootController {
 				if (itemList[i].getAttribute() == 0) {
 					TextInputDialog dialog = new TextInputDialog("新建文件夹");
 					dialog.setTitle("新建文件夹");
-					dialog.setHeaderText(String.format("在%s目录新建文件夹", parentDir.getPath()));
+					dialog.setHeaderText(String.format("新建文件夹"));
 					dialog.setContentText("文件夹名: ");
 					Optional<String> res = dialog.showAndWait();
 					if (res.isPresent()) {
@@ -210,10 +216,23 @@ public class FileSystemController extends RootController {
 								public void handle(MouseEvent event) {
 									if (event.getClickCount() == 2 && event.getButton() == MouseButton.PRIMARY) {
 										// 双击打开事件
-										// TODO 打开编辑窗口
 										FileLabel f = (FileLabel) event.getSource();
+										System.out.println("file opened: " + f);
+
+										// 打开文件
+										if ((f.getDirItem().getAttribute() & DirItem.FILE) > 0) {
+											//编辑窗口置顶
+//											RootController.controllers.get("controller.NotepadController").getStage().setAlwaysOnTop(true);
+											// 打开编辑窗口
+											if (!RootController.controllers.get("controller.NotepadController").getStage().isShowing()) {
+												((NotepadController) RootController.controllers.get("controller.NotepadController")).getStage().show();
+											}
+											// 打开对应文件
+											((NotepadController) RootController.controllers.get("controller.NotepadController")).openFile(((FileLabel) event.getSource()).getDirItem());
+										}
 										
-										if((f.getDirItem().getAttribute() & DirItem.DIR)>0) {
+										// 打开目录
+										if ((f.getDirItem().getAttribute() & DirItem.DIR) > 0) {
 											String path = f.getDirItem().getPath();
 											try {
 												TreeItem<DirItem> tmp = Utility.getTreeItem(path, FileSystemController.this.treeView);
@@ -223,16 +242,13 @@ public class FileSystemController extends RootController {
 												e.printStackTrace();
 											}
 										}
-										
-										
-										System.out.println("file opened: " + f);
-									} else if (event.getButton() == MouseButton.SECONDARY) {
-										menu.show(FileSystemController.this.flowPane, event.getScreenX(),
-												event.getScreenY());
+									} else if(event.getButton() == MouseButton.SECONDARY) {
+										menu.show(FileSystemController.this.flowPane, event.getScreenX(), event.getScreenY());
 										event.consume();
 									} else if (event.getButton() == MouseButton.PRIMARY && menu.isShowing()) {
 										menu.hide();
 									}
+
 								}
 							});
 
@@ -299,6 +315,18 @@ public class FileSystemController extends RootController {
 	@Override
 	public void setStage(Stage stage) {
 		this.stage = stage;
+		
+		this.stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+			
+			@Override
+			public void handle(WindowEvent event) {
+				Platform.exit(); //退出程序
+			}
+		});
+	}
+
+	public FileSystem getFileSystem() {
+		return fileSystem;
 	}
 
 }

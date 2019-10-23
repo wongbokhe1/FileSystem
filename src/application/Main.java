@@ -15,13 +15,6 @@ public class Main extends Application{
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		
-//		Parent root = FXMLLoader.load(Main.class.getResource("/view/FileSystem.fxml"));
-//		Scene scene = new Scene(root);
-//		Stage stage = new Stage();
-//		stage.setScene(scene);
-//		stage.setTitle("FileSystem");
-//		stage.show();
-		
 		try {
 			//准备好所有窗口
 			createStage("/view/FileSystem.fxml", "controller.FileSystemController", true);
@@ -41,9 +34,9 @@ public class Main extends Application{
 			stage.setScene(scene);
 			stage.setTitle("FileSystem");
 //			stage.getIcons().add(new Image(""));
+			//TODO add logo
 			RootController.controllers.get(controllerName).setStage(stage);
 			if(isShow) {
-//				stage.setMaximized(true);
 				stage.show();
 			}
 			
