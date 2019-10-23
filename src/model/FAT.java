@@ -39,10 +39,9 @@ public class FAT {
     	// TODO 逻辑有误
         if (index < 64) {
             table[0][index] = value;
-            this.vacantCount--;
+            
         } else if(index < 128){
             table[1][index] = value;
-            this.vacantCount--;
         }
         else {
         	System.out.println("Index out of range!");
@@ -74,19 +73,30 @@ public class FAT {
     	//因为系统占用了第0块和第1块，因此从第2块开始查询
         for (byte i = 2; i < table[0].length; i++) {
             if (table[0][i] == FAT.EMPTY) {
+            	this.vacantCount--;
                 return i;
             }
         }
         for (byte i = 0; i < table[1].length; i++) {
             if (table[1][i] == FAT.EMPTY) {
+            	this.vacantCount--;
                 return (byte) (i + 64);
             }
         }
         throw new Exception("error:FAT is full!");
     }
     
-    
- 
-	
+    public void release(byte index) throws Exception{
+    	if(getLocation(index) == FAT.EMPTY) {
+    		throw new Exception("不能释放一个空盘块");
+    	}
+    	while(index != FAT.USED) {
+    		byte tmp = getLocation(index);
+    		this.setTable(index, FAT.EMPTY);
+    		this.vacantCount++;
+    		index = tmp;
+    		
+    	}
+    }
     
 }

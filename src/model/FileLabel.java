@@ -46,6 +46,14 @@ public class FileLabel extends Label {
 
 	}
 
+	public DirItem getDirItem() {
+		return dirItem;
+	}
+
+	public void setDirItem(DirItem dirItem) {
+		this.dirItem = dirItem;
+	}
+
 	@Override
 	public String toString() {
 		return dirItem.toString();
