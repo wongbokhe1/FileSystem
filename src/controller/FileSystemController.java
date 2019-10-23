@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
+
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -44,10 +45,12 @@ import utils.Utility;
 
 public class FileSystemController extends RootController {
 
+
 	@FXML
 	private TreeView<DirItem> treeView;
 
 	private Stage stage;
+
 
 	@FXML
 	private FlowPane flowPane;
@@ -55,6 +58,9 @@ public class FileSystemController extends RootController {
 	private FileSystem fileSystem;
 
 	private ContextMenu flowpaneMenu;
+
+	private NotepadController notepadController;
+
 
 	private String currentPath;
 	
@@ -125,7 +131,7 @@ public class FileSystemController extends RootController {
 					break;
 				}
 			}
-			this.refreshTreeView();
+			this.refreshTreeView(parentDir.getPath());
 		} catch (Exception e) {
 			Alert errorAlert = new Alert(AlertType.ERROR);
 			errorAlert.setTitle("error");
@@ -136,7 +142,7 @@ public class FileSystemController extends RootController {
 		}
 	}
 
-	void createFile() {
+	public void createFile() {
 		DirItem[] itemList;
 		DirItem parentDir;
 		try {
@@ -162,7 +168,7 @@ public class FileSystemController extends RootController {
 					break;
 				}
 			}
-			this.refreshTreeView();
+			this.refreshTreeView(parentDir.getPath());
 		} catch (Exception e) {
 			Alert errorAlert = new Alert(AlertType.ERROR);
 			errorAlert.setTitle("error");
@@ -174,9 +180,13 @@ public class FileSystemController extends RootController {
 		}
 	}
 
-	public void refreshTreeView() {
+	public void refreshTreeView(String targetPath) {
 		try {
 			Utility.genTreeView(this.treeView, this.fileSystem);
+			if(targetPath != null) {
+				TreeItem<DirItem> targetTreeItem = Utility.getTreeItem(targetPath, this.treeView);
+				this.treeView.getSelectionModel().select(targetTreeItem);
+			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -212,7 +222,7 @@ public class FileSystemController extends RootController {
 									super.handle(event);
 									// TODO modify attribute/name
 								}
-								
+
 							});
 							deleteItem.setOnAction(new RightClickHandler(fileLabel) {
 
@@ -221,7 +231,7 @@ public class FileSystemController extends RootController {
 									super.handle(event);
 									try {
 										FileSystemController.this.fileSystem.delete(fileLabel.getDirItem());
-										FileSystemController.this.refreshTreeView();
+										FileSystemController.this.refreshTreeView(FileSystemController.this.treeView.getSelectionModel().getSelectedItem().getValue().getPath());
 									} catch (Exception e) {
 										Alert errorAlert = new Alert(AlertType.ERROR);
 										errorAlert.setTitle("error");
@@ -231,9 +241,9 @@ public class FileSystemController extends RootController {
 										errorAlert.showAndWait();
 									}
 								}
-								
+
 							});
-							menu.getItems().addAll(new MenuItem [] {modifyItem, deleteItem});
+							menu.getItems().addAll(new MenuItem[] { modifyItem, deleteItem });
 							fileLabel.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
 								@Override
 								public void handle(MouseEvent event) {
@@ -256,12 +266,19 @@ public class FileSystemController extends RootController {
 										
 										// 打开目录
 										if ((f.getDirItem().getAttribute() & DirItem.DIR) > 0) {
-											// TODO 双击打开目录
+											String path = f.getDirItem().getPath();
+											try {
+												TreeItem<DirItem> tmp = Utility.getTreeItem(path, FileSystemController.this.treeView);
+												FileSystemController.this.treeView.getSelectionModel().select(tmp);
+											} catch (Exception e) {
+												// TODO Auto-generated catch block
+												e.printStackTrace();
+											}
 										}
 									} else if(event.getButton() == MouseButton.SECONDARY) {
 										menu.show(FileSystemController.this.flowPane, event.getScreenX(), event.getScreenY());
 										event.consume();
-									} else if(event.getButton() == MouseButton.PRIMARY && menu.isShowing()){
+									} else if (event.getButton() == MouseButton.PRIMARY && menu.isShowing()) {
 										menu.hide();
 									}
 
@@ -320,7 +337,6 @@ public class FileSystemController extends RootController {
 				}
 			}
 		});
-    	
     	
     }
     
@@ -421,26 +437,18 @@ public class FileSystemController extends RootController {
 }
 
 class RightClickHandler implements EventHandler<ActionEvent> {
-	
+
 	private FileLabel fileLable;
-	
-	
-	
+
 	public RightClickHandler(FileLabel fileLable) {
 		super();
 		this.fileLable = fileLable;
 	}
 
-
-
 	@Override
 	public void handle(ActionEvent event) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
-
-
-
-	
 }
