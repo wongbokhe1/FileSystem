@@ -83,6 +83,8 @@ public class FileSystemController extends RootController {
 				errorAlert.setTitle("error");
 				errorAlert.setContentText("超过目录项上限");
 				errorAlert.setHeaderText(null);
+				errorAlert.showAndWait();
+				return;
 			}
 
 			for (int i = 0; i < itemList.length; i++) {
@@ -120,6 +122,8 @@ public class FileSystemController extends RootController {
 				errorAlert.setTitle("error");
 				errorAlert.setContentText("超过目录项上限");
 				errorAlert.setHeaderText(null);
+				errorAlert.showAndWait();
+				return;
 			}
 
 			for (int i = 0; i < itemList.length; i++) {
