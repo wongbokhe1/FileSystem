@@ -4,6 +4,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
 import controller.FileSystemController;
+import controller.NotepadController;
 import controller.RootController;
 import javafx.geometry.Insets;
 import javafx.scene.control.Menu;
@@ -76,11 +77,23 @@ public class NotepadTab extends Tab {
 	
 	public void save() {
 		//TODO 保存文件 -> 写入
+		byte[] text = this.textArea.getText().getBytes();
+		try {
+			((FileSystemController)RootController.controllers.get("controller.FileSystemController")).getFileSystem().write(this.dirItem, text);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 	
 	public void quit() {
 		try {
 			((FileSystemController)RootController.controllers.get("controller.FileSystemController")).getFileSystem().close(this.dirItem, null);
+			((NotepadController) RootController.controllers.get("controller.NotepadController")).removeTab(this);
+			if(((NotepadController) RootController.controllers.get("controller.NotepadController")).getTabPane().getTabs().size() == 0) {
+				((NotepadController) RootController.controllers.get("controller.NotepadController")).getStage().hide();
+			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
