@@ -242,15 +242,22 @@ public class FileSystem implements FileSystemInterface{
 		if(this.isOpen(item)) {
 			throw new Exception("文件已打开");
 		}
+		if(Utility.countValidItem(this.getFileTree(item), this) > 0) {
+			throw new Exception("只能删除空目录");
+		}
 		
 		//修改FAT，归还磁盘空间
-		byte currentBlock = item.getStartBlock();
-		byte nextBlock = fat.getLocation(currentBlock);
-		while(fat.getLocation(currentBlock) != FAT.USED) {
-			fat.setTable(currentBlock, FAT.EMPTY);
-			currentBlock = nextBlock;
-			nextBlock = fat.getLocation(currentBlock);
-		}
+		fat.release(item.getStartBlock());
+		//删除父级目录项
+		byte parentBlock = this.getParentBlock(item);
+		byte inblockIndex = item.getIndex();
+		item.setAttribute((byte)0);
+		item.setStartBlock((byte)0);
+		byte[] block = disk.getBlock(parentBlock);
+		byte[][] matrix = Utility.reshape(block);
+		matrix[inblockIndex] = item.getValues();
+		block = Utility.flatten(matrix);
+		this.disk.setBlock(parentBlock, block);
 		
 	}
 
@@ -304,6 +311,26 @@ public class FileSystem implements FileSystemInterface{
 			}
 		}
 		return current;
+		
+	}
+	
+	public byte getParentBlock(DirItem item) throws Exception {
+		List<String> dirList = FileSystem.parsePath(item.getPath());
+		dirList.remove(dirList.size()-1);
+		DirItem[] current = this.getFileTree();
+		Iterator<String> iter = dirList.iterator();
+		byte block;
+		while(iter.hasNext()) {
+			String name = iter.next();
+			for (DirItem dirItem : current) {
+				if (name.equals(dirItem.getName().trim())) {
+					block = dirItem.getStartBlock();
+					current = getFileTree(dirItem);
+					break;
+				}
+			}
+		}
+		return 0;
 		
 	}
 	
