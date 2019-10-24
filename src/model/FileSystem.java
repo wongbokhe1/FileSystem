@@ -131,77 +131,8 @@ public class FileSystem implements FileSystemInterface{
 			}else {
 				item.setMode(mode);
 				openedFile.add(item);
-//				openedFile.set(openedFile.size()+1, item); 
 			}
 		}
-//		byte[] data = new byte[item.getSize()*Disk.blockSize];
-//		byte blockNum = item.getStartBlock();
-//		int idx = 0;
-//		byte[] block = disk.getBlock(blockNum);
-//		for (byte b : block) {
-//			data[idx] = b;
-//			idx++;
-//		}
-//		while(FAT.USED != fat.getLocation(blockNum)) {
-//			block = disk.getBlock(blockNum);
-//			for (byte b : block) {
-//				data[idx] = b;
-//				idx++;
-//			}
-//			blockNum = fat.getLocation(blockNum);
-//		}
-//		return data;
-		
-//		if(openedFile.size()==5) {
-//			throw new Exception("仅容许打开5个文件, 但尝试打开更多文件");
-//		}else {
-//			item.setMode(mode);
-//			openedFile.add(item);
-////			openedFile.set(openedFile.size()+1, item); 
-//			
-//			byte[] data = new byte[item.getSize()*Disk.blockSize];
-//			byte blockNum = item.getStartBlock();
-//			int idx = 0;
-//			byte[] block = disk.getBlock(blockNum);
-//			for (byte b : block) {
-//				data[idx] = b;
-//				idx++;
-//			}
-//			while(FAT.USED != fat.getLocation(blockNum)) {
-//				block = disk.getBlock(blockNum);
-//				for (byte b : block) {
-//					data[idx] = b;
-//					idx++;
-//				}
-//				blockNum = fat.getLocation(blockNum);
-//			}
-//			return data;
-//		}
-		
-//		for(int i = 0; i<5; i++) {
-//			if(openedFile.get(i) == null) {
-//				item.setMode(mode);
-//				openedFile.set(i, item); 
-//				byte[] data = new byte[item.getSize()];
-//				byte blockNum = item.getStartBlock();
-//				int idx = 0;
-//				byte[] block = disk.getBlock(blockNum);
-//				for (byte b : block) {
-//					data[idx] = b;
-//					idx++;
-//				}
-//				while(FAT.USED != fat.getLocation(blockNum)) {
-//					block = disk.getBlock(blockNum);
-//					for (byte b : block) {
-//						data[idx] = b;
-//						idx++;
-//					}
-//					blockNum = fat.getLocation(blockNum);
-//				}
-//				return data;
-//			}
-//		}
-//		throw new Exception("仅容许打开5个文件, 但尝试打开更多文件");
 		
 		
 	}
@@ -243,7 +174,7 @@ public class FileSystem implements FileSystemInterface{
 				blockNum = fat.getLocation(blockNum);
 			}
 			// 追加分配块，同时写入
-			//获取当前的末尾盘块号
+			// 获取当前的末尾盘块号
 			byte lastBlockNum = item.getStartBlock();
 			while(fat.getLocation(lastBlockNum) != FAT.USED) {
 				lastBlockNum = fat.getLocation(lastBlockNum);
@@ -267,7 +198,7 @@ public class FileSystem implements FileSystemInterface{
 			fat.setTable(lastBlockNum, FAT.USED);
 			
 		} else {
-			// TODO 文件内容不变 || 变短，需释放多余盘块
+			// 文件内容不变 || 变短，需释放多余盘块
 			blockNum = item.getStartBlock();
 			for(int i = 0; i < neededBlocks-1; i++) {
 				dividedBlock = Arrays.copyOfRange(buffer, i*Disk.blockSize, (i+1)*Disk.blockSize);
@@ -294,40 +225,6 @@ public class FileSystem implements FileSystemInterface{
 		block = Utility.flatten(matrix);
 		this.disk.setBlock(parentBlock, block);
 		
-		
-//		//获取当前的末尾盘块号
-//		byte blockNum = item.getStartBlock();
-//		while(fat.getLocation(blockNum) != FAT.USED) {
-//			blockNum = fat.getLocation(blockNum);
-//		}
-//		
-//		byte lastBlockNum = blockNum;
-//		
-//		
-//		
-//		int amount = (buffer.length / Disk.blockSize) + 1;
-//		
-//		for(int i = 0; i < amount; i++) { 
-//			if(i == amount - 1) {
-//				dividedBlock = Arrays.copyOfRange(buffer, i*Disk.blockSize, buffer.length-1);
-//			}else {
-//				dividedBlock = Arrays.copyOfRange(buffer, i*Disk.blockSize, (i+1)*Disk.blockSize);
-//				// TODO copyOfRange range? 
-//			}
-//			//获取空盘块号
-//			emptyBlockNum = fat.getEmptyLocation();
-//			//改写FAT
-//			fat.setTable(lastBlockNum, emptyBlockNum);
-//			//写入磁盘
-//			lastBlockNum = emptyBlockNum;
-//			disk.setBlock(lastBlockNum, dividedBlock);
-//		}
-//		//标志文件结束
-//		fat.setTable(lastBlockNum, FAT.USED);
-//		
-//		//修改目录项的文件长度
-//		item.setSize((byte)(item.getSize() +amount));
-		
 	}
 
 	@Override
@@ -345,15 +242,7 @@ public class FileSystem implements FileSystemInterface{
 		byte[] data = new byte[item.getSize()*Disk.blockSize];
 		byte blockNum = item.getStartBlock();
 		int idx = 0;
-//		byte[] block = disk.getBlock(blockNum);
-//		for (byte b : block) {
-//			data[idx] = b;
-//			idx++;
-//		}
-//		blockNum = fat.getLocation(blockNum);
-//		while(FAT.USED != fat.getLocation(blockNum)) {//TODO
 		do {
-			
 			byte[] block = disk.getBlock(blockNum);
 			for (byte b : block) {
 				data[idx] = b;
@@ -370,9 +259,9 @@ public class FileSystem implements FileSystemInterface{
 		
 		this.checkPath(item);
 		
-		if(this.isOpen(item)) {
-			throw new Exception("文件已打开");
-		}
+//		if(this.isOpen(item)) {
+//			throw new Exception("文件已打开");
+//		}
 		if((item.getAttribute() & DirItem.DIR) > 0 && Utility.countValidItem(this.getFileTree(item), this) > 0) {
 			throw new Exception("只能删除空目录");
 		}
@@ -562,6 +451,10 @@ public class FileSystem implements FileSystemInterface{
 	 * 检查该目录是否有重名目录/文件
 	 */
 	private void checkName(String name, DirItem item) throws Exception {
+		if("".equals(name)) {
+			throw new Exception("文件名不能为空");
+		}
+		
 		DirItem[] fileTree = this.getFileTree(item);
 		for(DirItem d: fileTree) {
 			if(Utility.validItem(d,  this) && name.equals(d.getName().trim())) {

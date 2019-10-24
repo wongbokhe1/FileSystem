@@ -2,6 +2,7 @@ package application;
 
 import java.io.IOException;
 
+import controller.EditorController;
 import controller.RootController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -20,6 +21,7 @@ public class Main extends Application{
 			createStage("/view/FileSystem.fxml", "controller.FileSystemController", true);
 			createStage("/view/Editor.fxml", "controller.EditorController", false);
 			createStage("/view/Notepad.fxml", "controller.NotepadController", false);
+			((EditorController) RootController.controllers.get("controller.EditorController")).getStage().setResizable(false);
 			
 		} catch(Exception e) {
 			e.printStackTrace();

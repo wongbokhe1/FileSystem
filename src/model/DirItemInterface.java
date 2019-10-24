@@ -10,12 +10,12 @@ public interface DirItemInterface {
 	
 	
 	public byte getAttribute();
-	public String getName() throws Exception;
-	public String getType() throws Exception;
+	public String getName();
+	public String getType();
 	public byte getSize();
 	public byte getStartBlock();
 	public void setName(String name) throws Exception;
-	public void setAttribute(byte attribute);
+	public void setAttribute(byte attribute) throws Exception;
 	public void setType(String type) throws Exception;
 	public void setSize(byte size);
 	public void setStartBlock(byte startBlock);

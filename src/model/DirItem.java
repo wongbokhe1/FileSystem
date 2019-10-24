@@ -44,7 +44,7 @@ public class DirItem implements DirItemInterface {
 	}
 
 	@Override
-	public String getName() throws Exception{
+	public String getName(){
 		byte[] name = Arrays.copyOfRange(this.values, 0, 3);
 		return new String(name);
 //		if ((values[5] & (DirItem.FILE | DirItem.SYS_FILE | DirItem.DIR)) > 0) {
@@ -55,7 +55,7 @@ public class DirItem implements DirItemInterface {
 	}
 
 	@Override
-	public String getType() throws Exception{
+	public String getType(){
 		return new String(Arrays.copyOfRange(this.values, 3, 5));
 
 		
@@ -74,6 +74,10 @@ public class DirItem implements DirItemInterface {
 
 	@Override
 	public void setName(String name) throws Exception{
+		if("".equals(name)) {
+			throw new Exception("文件名不能为空");
+		}
+		
 		byte[] bName = name.getBytes();
 		if(bName.length > 3) {
 			throw new Exception("文件名过长, 最大允许长度为3");
@@ -89,7 +93,10 @@ public class DirItem implements DirItemInterface {
 
 
 	@Override
-	public void setAttribute(byte attribute) {
+	public void setAttribute(byte attribute) throws Exception {
+		if(attribute == 0) {
+			throw new Exception("属性非法！");
+		}
 		this.values[5] = attribute;
 	}
 
@@ -207,7 +214,36 @@ public class DirItem implements DirItemInterface {
 		this.index = index;
 	}
 	
-
+	public boolean isRegularFile() {
+		if ((this.values[5] & DirItemInterface.FILE) > 0) {
+			return true;
+		}else {
+			return false;
+		}
+	}
 	
+	public boolean isSystemFile() {
+		if ((this.values[5] & DirItemInterface.SYS_FILE) > 0) {
+			return true;
+		}else {
+			return false;
+		}
+	}
 
+	public boolean isReadOnlyFile() {
+		if ((this.values[5] & DirItemInterface.READONLY) > 0) {
+			return true;
+		}else {
+			return false;
+		}
+	}
+	
+	public boolean isDir() {
+		if ((this.values[5] & DirItemInterface.DIR) > 0) {
+			return true;
+		}else {
+			return false;
+		}
+		
+	}
 }

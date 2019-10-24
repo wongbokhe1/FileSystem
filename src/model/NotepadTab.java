@@ -7,6 +7,8 @@ import controller.FileSystemController;
 import controller.NotepadController;
 import controller.RootController;
 import javafx.geometry.Insets;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -28,7 +30,6 @@ public class NotepadTab extends Tab {
 			setText(dirItem.getName());
 			setClosable(true);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -44,7 +45,6 @@ public class NotepadTab extends Tab {
 				this.textArea.setText(" ");
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		this.borderPane.setCenter(this.textArea);
@@ -76,15 +76,20 @@ public class NotepadTab extends Tab {
 	}
 	
 	public void save() {
-		//  保存文件 -> 写入
+		// 保存文件 -> 写入
 		byte[] text = this.textArea.getText().getBytes();
 		try {
 			((FileSystemController)RootController.controllers.get("controller.FileSystemController")).getFileSystem().write(this.dirItem, text);
 			((FileSystemController)RootController.controllers.get("controller.FileSystemController")).upDateDiskUsingTable();
 			((FileSystemController)RootController.controllers.get("controller.FileSystemController")).upDateFATTable();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Alert errorAlert = new Alert(AlertType.ERROR);
+			errorAlert.setTitle("Error");
+			errorAlert.setContentText("磁盘空间不足！");
+			errorAlert.setHeaderText(null);
+			errorAlert.showAndWait();
+			return;
+
 		}
 		
 	}
@@ -97,7 +102,6 @@ public class NotepadTab extends Tab {
 				((NotepadController) RootController.controllers.get("controller.NotepadController")).getStage().hide();
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
