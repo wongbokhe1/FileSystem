@@ -175,7 +175,8 @@ public class EditorController extends RootController {
 			return;
 		}
 		((EditorController) RootController.controllers.get("controller.EditorController")).getStage().hide();
-		//TODO refresh
+		// refresh
+		((FileSystemController) RootController.controllers.get("controller.FileSystemController")).refreshTreeView(dirItem.getPath());
 	}
 
 	private void addTextDetector() {

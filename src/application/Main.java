@@ -36,7 +36,7 @@ public class Main extends Application{
 			Stage stage = new Stage();
 			stage.setScene(scene);
 			stage.setTitle("FileSystem");
-//			stage.getIcons().add(new Image(""));
+			stage.getIcons().add(new Image("/view/filesystem_icon.png"));
 			//TODO add logo
 			RootController.controllers.get(controllerName).setStage(stage);
 			if(isShow) {

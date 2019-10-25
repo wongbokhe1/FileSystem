@@ -19,9 +19,9 @@ public class FileLabel extends Label {
 		this.dirItem = dirItem;
 		if (dirItem.getAttribute() == DirItem.FILE) {
 			// 判断文件/目录
-			this.image = new Image(Main.class.getResourceAsStream("/view/file.png"), 85, 85, true, true);
+			this.image = new Image(Main.class.getResourceAsStream("/view/file_icon.png"), 85, 85, true, true);
 		} else {
-			this.image = new Image(Main.class.getResourceAsStream("/view/folder.png"), 85, 85, true, true);
+			this.image = new Image(Main.class.getResourceAsStream("/view/folder_icon.png"), 85, 85, true, true);
 		}
 		this.imageView = new ImageView(this.image);
 		super.setGraphic(this.imageView);
