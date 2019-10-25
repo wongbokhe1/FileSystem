@@ -42,6 +42,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 import model.DirItem;
 import model.Disk;
@@ -99,10 +100,6 @@ public class FileSystemController extends RootController {
 		this.initDiskUsingTable();
 		this.initDiskUsingPieChart();
 		this.initFATTable();
-		
-		
-		
-		// TODO Auto-generated method stub
 		try {
 			Utility.genTreeView(this.treeView, this.fileSystem);
 			this.treeView.getSelectionModel().select(this.treeView.getRoot());
@@ -208,7 +205,6 @@ public class FileSystemController extends RootController {
 			errorAlert.setTitle("error");
 			errorAlert.setHeaderText(null);
 			errorAlert.setContentText(e.getMessage());
-			e.printStackTrace();
 			errorAlert.showAndWait();
 
 		}
@@ -257,6 +253,21 @@ public class FileSystemController extends RootController {
 								public void handle(ActionEvent event) {
 									super.handle(event);
 									// TODO modify attribute/name
+									// 设置显示属性
+									boolean isFile = true;
+									if(dirItem.isDir()) {
+										isFile = false;
+									}
+									try {
+										((EditorController) RootController.controllers.get("controller.EditorController")).showStage(dirItem,isFile);
+										
+									} catch (Exception e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+									
+
+									
 								}
 
 							});
