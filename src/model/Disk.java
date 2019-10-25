@@ -15,6 +15,13 @@ public class Disk {
         }
 	}
 	
+	public Disk(byte[] byteArray) {
+		this.storageBlocks = new byte[this.totalBlock][this.blockSize];
+		for(int i = 0; i<byteArray.length; i++) {
+			this.storageBlocks[i/64][i%64] = byteArray[i];
+		}
+	}
+	
 	// TODO load disk from file
 	
 	/**
@@ -43,6 +50,18 @@ public class Disk {
      */
     public byte[] getBlock(int index) {
         return storageBlocks[index];
+    }
+    
+    public byte[] getDiskArray() {
+    	byte[] array = new byte [this.totalBlock * this.blockSize];
+    	int i = 0;
+    	for (byte[] bs : this.storageBlocks) {
+			for (byte b : bs) {
+				array[i++] = b;
+			}
+		}
+		return array;
+    	
     }
     
     

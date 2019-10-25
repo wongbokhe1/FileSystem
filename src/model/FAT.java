@@ -27,6 +27,20 @@ public class FAT {
         this.vacantCount = 126;
 	}
     
+    public FAT(Disk disk) {
+    	this.table = new byte[2][Disk.blockSize];
+    	this.table[0] = disk.getBlock(0);
+    	this.table[1] = disk.getBlock(1);
+    	this.vacantCount = 0;
+    	for (byte[] bs : this.table) {
+			for (byte b : bs) {
+				if(b==FAT.EMPTY) {
+					this.vacantCount++;
+				}
+			}
+		}
+    }
+    
     // TODO load existent fat
     
     /**

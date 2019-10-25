@@ -2,6 +2,7 @@ package application;
 
 import java.io.IOException;
 
+import controller.FileSystemController;
 import controller.RootController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -37,6 +38,7 @@ public class Main extends Application{
 			//TODO add logo
 			RootController.controllers.get(controllerName).setStage(stage);
 			if(isShow) {
+				((FileSystemController)RootController.controllers.get(controllerName)).initCloseEventHandler();
 				stage.show();
 			}
 			

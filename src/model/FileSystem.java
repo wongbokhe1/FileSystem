@@ -20,7 +20,10 @@ public class FileSystem implements FileSystemInterface{
 		this.disk = new Disk();
 	}
 	
-
+	public FileSystem(byte[] diskArray) {
+		this.disk = new Disk(diskArray);
+		this.fat = new FAT(disk);
+	}
 
 	
 	@Override

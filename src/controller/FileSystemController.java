@@ -1,6 +1,12 @@
 package controller;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -89,12 +95,13 @@ public class FileSystemController extends RootController {
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		loadExistDisk();
 		this.initDiskUsingTable();
 		this.initDiskUsingPieChart();
 		this.initFATTable();
 		
 		
-		this.fileSystem = new FileSystem();
+		
 		// TODO Auto-generated method stub
 		try {
 			Utility.genTreeView(this.treeView, this.fileSystem);
@@ -107,6 +114,25 @@ public class FileSystemController extends RootController {
 		}
 		this.upDateDiskUsingTable();
 		this.upDateFATTable();
+		refreshTreeView("/");
+	}
+	
+	public void loadExistDisk() {
+		String savePath = "./disk.dat";
+		try {
+			FileInputStream fileInputStream = new FileInputStream(savePath);
+			byte[] diskArray = new byte[Disk.blockSize*Disk.totalBlock];
+			fileInputStream.read(diskArray);
+			fileInputStream.close();
+			this.fileSystem = new FileSystem(diskArray);
+			
+		} catch (FileNotFoundException e) {
+			this.fileSystem = new FileSystem();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 
 	public void createDir() {
@@ -446,6 +472,32 @@ public class FileSystemController extends RootController {
 
 	public FileSystem getFileSystem() {
 		return fileSystem;
+	}
+	
+	public void initCloseEventHandler() {
+		this.stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+
+			@Override
+			public void handle(WindowEvent event) {
+				String savePath = "./disk.dat";
+				try {
+					byte[][] fatBlocks = FileSystemController.this.fileSystem.getFat().getTable();
+					FileSystemController.this.fileSystem.getDisk().setBlock(0, fatBlocks[0]);
+					FileSystemController.this.fileSystem.getDisk().setBlock(1, fatBlocks[1]);
+					FileOutputStream fileOutputStream = new FileOutputStream(savePath);
+					byte[] diskArray = FileSystemController.this.fileSystem.getDisk().getDiskArray();
+					fileOutputStream.write(diskArray);
+					fileOutputStream.close();
+				} catch (FileNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			}
+		});
 	}
 
 }
