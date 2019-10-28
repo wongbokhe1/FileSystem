@@ -9,10 +9,11 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Optional;
 import java.util.ResourceBundle;
-
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -26,6 +27,8 @@ import javafx.scene.Node;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.control.Button;
@@ -33,6 +36,7 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
@@ -44,6 +48,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
+import jdk.nashorn.internal.ir.Flags;
 import model.DirItem;
 import model.Disk;
 import model.FAT;
@@ -53,12 +58,12 @@ import utils.Utility;
 
 public class FileSystemController extends RootController {
 
-
 	@FXML
 	private TreeView<DirItem> treeView;
 
 	private Stage stage;
 
+	private boolean flag = true;
 
 	@FXML
 	private FlowPane flowPane;
@@ -69,35 +74,40 @@ public class FileSystemController extends RootController {
 
 	private NotepadController notepadController;
 
-
 	private String currentPath;
-	
+
 	private PieChart.Data usedDisk;
-	
+
 	private PieChart.Data noUsedDisk;
 
 	private double used = 0;
 	private double noUsed = 1;
-	
-	private int lastRow = -1;
-	
+
+	private List<String> history;
+	private ListIterator<String> currentDirIterator;
+
 	@FXML
 	private PieChart diskUsingPieChart;
-	
+
 	private ObservableList<PieChart.Data> pieChartData;
+	
+    @FXML
+    private TextField pathText;
 
 	@FXML
 	private GridPane diskUsingTable;
 
 	private List<StackPane> diskUsingTableBlocks = new ArrayList<StackPane>();
 
-    @FXML
-    private GridPane FATTable;
-    private List<StackPane> FATTableBlocks = new ArrayList<StackPane>();
-    private List<Text> FATTableTextBlocks = new ArrayList<Text>();
+	@FXML
+	private GridPane FATTable;
+	private List<StackPane> FATTableBlocks = new ArrayList<StackPane>();
+	private List<Text> FATTableTextBlocks = new ArrayList<Text>();
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		this.history = new ArrayList<String>();
+		this.currentDirIterator = this.history.listIterator();
 		loadExistDisk();
 		this.initDiskUsingTable();
 		this.initDiskUsingPieChart();
@@ -113,25 +123,30 @@ public class FileSystemController extends RootController {
 		}
 		this.upDateDiskUsingTable();
 		this.upDateFATTable();
-		refreshTreeView("/");
+		try {
+			refreshTreeView("/");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
-	
+
 	public void loadExistDisk() {
 		String savePath = "./disk.dat";
 		try {
 			FileInputStream fileInputStream = new FileInputStream(savePath);
-			byte[] diskArray = new byte[Disk.blockSize*Disk.totalBlock];
+			byte[] diskArray = new byte[Disk.blockSize * Disk.totalBlock];
 			fileInputStream.read(diskArray);
 			fileInputStream.close();
 			this.fileSystem = new FileSystem(diskArray);
-			
+
 		} catch (FileNotFoundException e) {
 			this.fileSystem = new FileSystem();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
 
 	public void createDir() {
@@ -212,19 +227,22 @@ public class FileSystemController extends RootController {
 		}
 	}
 
-	public void refreshTreeView(String targetPath) {
-		
-		try {
-			Utility.genTreeView(this.treeView, this.fileSystem);
-			this.upDateDiskUsingTable();
-			this.upDateFATTable();
-			if(targetPath != null) {
+	public void refreshTreeView(String targetPath) throws Exception {
+		int idx = this.treeView.getSelectionModel().getSelectedIndex();
+		TreeItem<DirItem> tmpItem = this.treeView.getRoot();
+		Utility.genTreeView(this.treeView, this.fileSystem);
+		this.upDateDiskUsingTable();
+		this.upDateFATTable();
+		if (targetPath != null) {
+			try {
 				TreeItem<DirItem> targetTreeItem = Utility.getTreeItem(targetPath, this.treeView);
 				this.treeView.getSelectionModel().select(targetTreeItem);
+			} catch (Exception e) {
+				this.treeView.setRoot(tmpItem);
+				this.treeView.getSelectionModel().select(idx);
+				throw e;
 			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
 		}
 	}
 
@@ -238,10 +256,28 @@ public class FileSystemController extends RootController {
 				if (newValue == null) {
 					return;
 				}
-				
-				FileSystemController.this.lastRow = FileSystemController.this.treeView.getRow(oldValue);
+
+				if (FileSystemController.this.flag) {
+					if (FileSystemController.this.currentDirIterator.hasNext()) {
+						ListIterator<String> iter = FileSystemController.this.history
+								.listIterator(FileSystemController.this.currentDirIterator.nextIndex());
+						iter.next();
+						if (FileSystemController.this.currentDirIterator.hasNext()) {
+							while (iter.hasNext()) {
+								iter.next();
+								iter.remove();
+							}
+						}
+					}
+
+					FileSystemController.this.history.add(newValue.getValue().getPath());
+					FileSystemController.this.currentDirIterator = FileSystemController.this.history
+							.listIterator(FileSystemController.this.history.size() - 1);
+				}
+				FileSystemController.this.flag = true;
 
 				FileSystemController.this.currentPath = newValue.getValue().getPath();
+				FileSystemController.this.pathText.setText(FileSystemController.this.currentPath);
 				System.out.println(FileSystemController.this.currentPath);
 
 				try {
@@ -260,19 +296,18 @@ public class FileSystemController extends RootController {
 									// TODO modify attribute/name
 									// 设置显示属性
 									boolean isFile = true;
-									if(dirItem.isDir()) {
+									if (dirItem.isDir()) {
 										isFile = false;
 									}
 									try {
-										((EditorController) RootController.controllers.get("controller.EditorController")).showStage(dirItem,isFile);
-										
+										((EditorController) RootController.controllers
+												.get("controller.EditorController")).showStage(dirItem, isFile);
+
 									} catch (Exception e) {
 										// TODO Auto-generated catch block
 										e.printStackTrace();
 									}
-									
 
-									
 								}
 
 							});
@@ -283,7 +318,8 @@ public class FileSystemController extends RootController {
 									super.handle(event);
 									try {
 										FileSystemController.this.fileSystem.delete(fileLabel.getDirItem());
-										FileSystemController.this.refreshTreeView(FileSystemController.this.treeView.getSelectionModel().getSelectedItem().getValue().getPath());
+										FileSystemController.this.refreshTreeView(FileSystemController.this.treeView
+												.getSelectionModel().getSelectedItem().getValue().getPath());
 									} catch (Exception e) {
 										Alert errorAlert = new Alert(AlertType.ERROR);
 										errorAlert.setTitle("error");
@@ -306,29 +342,35 @@ public class FileSystemController extends RootController {
 
 										// 打开文件
 										if ((f.getDirItem().getAttribute() & DirItem.FILE) > 0) {
-											//编辑窗口置顶
+											// 编辑窗口置顶
 //											RootController.controllers.get("controller.NotepadController").getStage().setAlwaysOnTop(true);
 											// 打开编辑窗口
-											if (!RootController.controllers.get("controller.NotepadController").getStage().isShowing()) {
-												((NotepadController) RootController.controllers.get("controller.NotepadController")).getStage().show();
+											if (!RootController.controllers.get("controller.NotepadController")
+													.getStage().isShowing()) {
+												((NotepadController) RootController.controllers
+														.get("controller.NotepadController")).getStage().show();
 											}
 											// 打开对应文件
-											((NotepadController) RootController.controllers.get("controller.NotepadController")).openFile(((FileLabel) event.getSource()).getDirItem());
+											((NotepadController) RootController.controllers
+													.get("controller.NotepadController"))
+															.openFile(((FileLabel) event.getSource()).getDirItem());
 										}
-										
+
 										// 打开目录
 										if ((f.getDirItem().getAttribute() & DirItem.DIR) > 0) {
 											String path = f.getDirItem().getPath();
 											try {
-												TreeItem<DirItem> tmp = Utility.getTreeItem(path, FileSystemController.this.treeView);
+												TreeItem<DirItem> tmp = Utility.getTreeItem(path,
+														FileSystemController.this.treeView);
 												FileSystemController.this.treeView.getSelectionModel().select(tmp);
 											} catch (Exception e) {
 												// TODO Auto-generated catch block
 												e.printStackTrace();
 											}
 										}
-									} else if(event.getButton() == MouseButton.SECONDARY) {
-										menu.show(FileSystemController.this.flowPane, event.getScreenX(), event.getScreenY());
+									} else if (event.getButton() == MouseButton.SECONDARY) {
+										menu.show(FileSystemController.this.flowPane, event.getScreenX(),
+												event.getScreenY());
 										event.consume();
 									} else if (event.getButton() == MouseButton.PRIMARY && menu.isShowing()) {
 										menu.hide();
@@ -389,9 +431,9 @@ public class FileSystemController extends RootController {
 				}
 			}
 		});
-    	
-    }
-    
+
+	}
+
 	private void initDiskUsingTable() {
 		for (int i = 0; i < Disk.totalBlock; i++) {
 			Text diskBlock = new Text(String.valueOf(i));
@@ -399,38 +441,37 @@ public class FileSystemController extends RootController {
 			stackPane.getChildren().add(diskBlock);
 			stackPane.setStyle("-fx-background-color: #46e145");
 			this.diskUsingTableBlocks.add(stackPane);
-			this.diskUsingTable.add(stackPane, i%8, i/8);
+			this.diskUsingTable.add(stackPane, i % 8, i / 8);
 		}
 	}
-	
-	
+
 	public void upDateDiskUsingTable() {
 		this.used = 0;
 		this.noUsed = 0;
 		for (int i = 0; i < Disk.totalBlock; i++) {
-			if(this.fileSystem.getFat().getLocation((byte) i) != FAT.EMPTY) {
+			if (this.fileSystem.getFat().getLocation((byte) i) != FAT.EMPTY) {
 				this.diskUsingTableBlocks.get(i).setStyle("-fx-background-color: #FF3333");
 				this.used++;
-			}else {
+			} else {
 				this.diskUsingTableBlocks.get(i).setStyle("-fx-background-color: #DDDDDD");
 				this.noUsed--;
 			}
 		}
 		upDateDiskUsingPieChart();
 	}
-	
+
 	private void initDiskUsingPieChart() {
 		this.usedDisk = new PieChart.Data("已使用", this.used);
 		this.noUsedDisk = new PieChart.Data("未使用", this.noUsed);
 		this.pieChartData = FXCollections.observableArrayList(this.usedDisk, this.noUsedDisk);
 		this.diskUsingPieChart.setData(this.pieChartData);
 	}
-	
+
 	public void upDateDiskUsingPieChart() {
 		this.usedDisk.setPieValue(this.used);
 		this.noUsedDisk.setPieValue(this.noUsed);
 	}
-	
+
 	private void initFATTable() {
 		for (byte i = 0; i < 3; i++) {
 			Text diskBlock = new Text("-1");
@@ -439,10 +480,10 @@ public class FileSystemController extends RootController {
 			stackPane.setStyle("-fx-background-color: #DDDDDD");
 			this.FATTableTextBlocks.add(diskBlock);
 			this.FATTableBlocks.add(stackPane);
-			this.FATTable.add(stackPane, i/64, i%64);
+			this.FATTable.add(stackPane, i / 64, i % 64);
 		}
 		for (int i = 3; i < Disk.totalBlock; i++) {
-			//TODO get true FAT
+			// TODO get true FAT
 //			Text diskBlock = new Text(String.valueOf(this.fileSystem.getFat().getLocation(i)));
 			Text diskBlock = new Text("0");
 			StackPane stackPane = new StackPane();
@@ -450,17 +491,17 @@ public class FileSystemController extends RootController {
 			stackPane.setStyle("-fx-background-color: #DDDDDD");
 			this.FATTableTextBlocks.add(diskBlock);
 			this.FATTableBlocks.add(stackPane);
-			this.FATTable.add(stackPane, i/64, i%64);
+			this.FATTable.add(stackPane, i / 64, i % 64);
 		}
 	}
-	
+
 	public void upDateFATTable() {
 		for (int i = 0; i < Disk.totalBlock; i++) {
-			if(this.fileSystem.getFat().getLocation((byte) i) != FAT.EMPTY) {
+			if (this.fileSystem.getFat().getLocation((byte) i) != FAT.EMPTY) {
 				this.FATTableBlocks.get(i).setStyle("-fx-background-color: #FF3333");
 				String string = String.valueOf(this.fileSystem.getFat().getLocation((byte) i));
 				this.FATTableTextBlocks.get(i).setText(string);
-			}else {
+			} else {
 				this.FATTableBlocks.get(i).setStyle("-fx-background-color: #DDDDDD");
 				String string = String.valueOf(this.fileSystem.getFat().getLocation((byte) i));
 				this.FATTableTextBlocks.get(i).setText(string);
@@ -476,12 +517,12 @@ public class FileSystemController extends RootController {
 	@Override
 	public void setStage(Stage stage) {
 		this.stage = stage;
-		
+
 		this.stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-			
+
 			@Override
 			public void handle(WindowEvent event) {
-				Platform.exit(); //退出程序
+				Platform.exit(); // 退出程序
 			}
 		});
 	}
@@ -489,7 +530,7 @@ public class FileSystemController extends RootController {
 	public FileSystem getFileSystem() {
 		return fileSystem;
 	}
-	
+
 	public void initCloseEventHandler() {
 		this.stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
 
@@ -511,15 +552,76 @@ public class FileSystemController extends RootController {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
+
 			}
 		});
 	}
+
+	@FXML
+	void backButton(ActionEvent event) {
+		if (this.currentDirIterator.hasPrevious()) {
+			String path = this.currentDirIterator.previous();
+			this.flag = false;
+			try {
+				this.refreshTreeView(path);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+	}
+
+	@FXML
+	void nextButton(ActionEvent event) {
+		if (this.currentDirIterator.hasNext()) {
+			ListIterator<String> iter = this.history.listIterator(this.currentDirIterator.nextIndex());
+			iter.next();
+			if (iter.hasNext()) {
+				String path = iter.next();
+				this.flag = false;
+				try {
+					this.refreshTreeView(path);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				this.currentDirIterator = iter;
+			}
+		}
+	}
 	
     @FXML
-    void backButton(ActionEvent event) {
-    	this.treeView.getSelectionModel().select(this.lastRow);
+    void trackButton(ActionEvent event) {
+    	String[] pathList = this.currentPath.split("/");
+    	String path = "/";
+    	for(int i = 0; i<pathList.length-1; i++) {
+    		path = path + pathList[i] + "/";
+    	}
+    	try {
+			refreshTreeView(path);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
+
+    @FXML
+    void textEnter(KeyEvent event) {
+    	if(event.getCode() == KeyCode.ENTER) {
+    		try {
+				refreshTreeView(this.pathText.getText());
+			} catch (Exception e) {
+				Alert errorAlert = new Alert(AlertType.ERROR);
+				errorAlert.setTitle("error");
+				errorAlert.setHeaderText(null);
+				errorAlert.setContentText(e.getMessage());
+				errorAlert.showAndWait();
+			}
+    	}
+    	
+    }
+
 
 }
 
@@ -537,8 +639,5 @@ class RightClickHandler implements EventHandler<ActionEvent> {
 		// TODO Auto-generated method stub
 
 	}
-	
-	
-	
 
 }

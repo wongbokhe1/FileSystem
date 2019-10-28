@@ -304,29 +304,46 @@
 }
 
 
-.playToggleButton {
+.backButton {
 	-fx-background-color: transparent;
-	-fx-graphic: url(./button/play.png);
+	-fx-graphic: url(./button/back-icon.png);
 }
 
-.playToggleButton:hover {
+.backButton:hover {
 	-fx-background-color: transparent;
-	-fx-graphic: url(./button/play_hover.png);
+	-fx-graphic: url(./button/back-icon_hover.png);
 }
 
-.playToggleButton:pressed {
+.backButton:pressed {
 	-fx-background-color: transparent;
-	-fx-graphic: url(./button/play_pressed.png);
+	-fx-graphic: url(./button/back-icon_pressed.png);
 }
 
-.playToggleButton:selected {
-	-fx-graphic: url(./button/stop.png);
+.forwardButton {
+	-fx-background-color: transparent;
+	-fx-graphic: url(./button/forward-icon.png);
 }
-.playToggleButton:selected:hover {
-	-fx-graphic: url(./button/stop_hover.png);
-}
-
-.playToggleButton:selected:pressed {
-	-fx-graphic: url(./button/stop_pressed.png);
+.forwardButton:hover {
+	-fx-background-color: transparent;
+	-fx-graphic: url(./button/forward-icon_hover.png);
 }
 
+.forwardButton:pressed {
+	-fx-background-color: transparent;
+	-fx-graphic: url(./button/forward-icon_pressed.png);
+}
+
+.upButton {
+	-fx-background-color: transparent;
+	-fx-graphic: url(./button/up-icon.png);
+}
+
+.upButton:hover {
+	-fx-background-color: transparent;
+	-fx-graphic: url(./button/up-icon_hover.png);
+}
+
+.upButton:pressed {
+	-fx-background-color: transparent;
+	-fx-graphic: url(./button/up-icon_pressed.png);
+}

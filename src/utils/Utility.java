@@ -99,12 +99,16 @@ public class Utility {
 		while(sIter.hasNext()) {
 			String name = sIter.next();
 			Iterator<TreeItem<DirItem>> itemIter = current.getChildren().iterator();
+			boolean flag = true;
 			while (itemIter.hasNext()) {
 				TreeItem<DirItem> item = itemIter.next();
 				if(item.getValue().getName().trim().equals(name)) {
 					current = item;
+					flag = false;
 				}
-				
+			}
+			if(flag) {
+				throw new Exception("找不到目录");
 			}
 		}
 		return current;

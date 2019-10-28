@@ -176,7 +176,17 @@ public class EditorController extends RootController {
 		}
 		((EditorController) RootController.controllers.get("controller.EditorController")).getStage().hide();
 		// refresh
-		((FileSystemController) RootController.controllers.get("controller.FileSystemController")).refreshTreeView(dirItem.getPath());
+		try {
+			((FileSystemController) RootController.controllers.get("controller.FileSystemController")).refreshTreeView(dirItem.getPath());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			Alert errorAlert = new Alert(AlertType.ERROR);
+			errorAlert.setTitle("error");
+			errorAlert.setHeaderText(null);
+			errorAlert.setContentText(e.getMessage());
+			errorAlert.showAndWait();
+			e.printStackTrace();
+		}
 	}
 
 	private void addTextDetector() {
