@@ -79,6 +79,8 @@ public class FileSystemController extends RootController {
 	private double used = 0;
 	private double noUsed = 1;
 	
+	private int lastRow = -1;
+	
 	@FXML
 	private PieChart diskUsingPieChart;
 	
@@ -211,6 +213,7 @@ public class FileSystemController extends RootController {
 	}
 
 	public void refreshTreeView(String targetPath) {
+		
 		try {
 			Utility.genTreeView(this.treeView, this.fileSystem);
 			this.upDateDiskUsingTable();
@@ -235,6 +238,8 @@ public class FileSystemController extends RootController {
 				if (newValue == null) {
 					return;
 				}
+				
+				FileSystemController.this.lastRow = FileSystemController.this.treeView.getRow(oldValue);
 
 				FileSystemController.this.currentPath = newValue.getValue().getPath();
 				System.out.println(FileSystemController.this.currentPath);
@@ -510,6 +515,11 @@ public class FileSystemController extends RootController {
 			}
 		});
 	}
+	
+    @FXML
+    void backButton(ActionEvent event) {
+    	this.treeView.getSelectionModel().select(this.lastRow);
+    }
 
 }
 
@@ -527,6 +537,7 @@ class RightClickHandler implements EventHandler<ActionEvent> {
 		// TODO Auto-generated method stub
 
 	}
+	
 	
 	
 
