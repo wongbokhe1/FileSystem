@@ -60,6 +60,7 @@ public class FileSystemController extends RootController {
 	private FileSystem fileSystem;
 
 	private ContextMenu flowpaneMenu;
+	private ContextMenu itemMenu;
 
 	private NotepadController notepadController;
 
@@ -87,6 +88,7 @@ public class FileSystemController extends RootController {
 	private GridPane diskUsingTable;
 
 	private List<StackPane> diskUsingTableBlocks = new ArrayList<StackPane>();
+	
 
 	@FXML
 	private GridPane FATTable;
@@ -360,6 +362,7 @@ public class FileSystemController extends RootController {
 									} else if (event.getButton() == MouseButton.SECONDARY) {
 										menu.show(FileSystemController.this.flowPane, event.getScreenX(),
 												event.getScreenY());
+										FileSystemController.this.itemMenu = menu;
 										event.consume();
 									} else if (event.getButton() == MouseButton.PRIMARY && menu.isShowing()) {
 										menu.hide();
@@ -417,6 +420,9 @@ public class FileSystemController extends RootController {
 				} else if (event.getButton() == MouseButton.PRIMARY
 						|| FileSystemController.this.flowpaneMenu.isShowing()) {
 					FileSystemController.this.flowpaneMenu.hide();
+					if(FileSystemController.this.itemMenu != null) {
+						FileSystemController.this.itemMenu.hide();
+					}
 				}
 			}
 		});
