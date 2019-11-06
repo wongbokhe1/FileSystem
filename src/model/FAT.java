@@ -55,7 +55,7 @@ public class FAT {
             table[0][index] = value;
             
         } else if(index < 128){
-            table[1][index] = value;
+            table[1][index % 64] = value;
         }
         else {
         	System.out.println("Index out of range!");

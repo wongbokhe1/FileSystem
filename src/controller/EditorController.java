@@ -101,7 +101,6 @@ public class EditorController extends RootController {
 	@FXML
 	public void close() {
 		((EditorController) RootController.controllers.get("controller.EditorController")).getStage().hide();
-		//TODO refresh
 	}
 
 	@FXML
@@ -177,9 +176,13 @@ public class EditorController extends RootController {
 		((EditorController) RootController.controllers.get("controller.EditorController")).getStage().hide();
 		// refresh
 		try {
-			((FileSystemController) RootController.controllers.get("controller.FileSystemController")).refreshTreeView(dirItem.getPath());
+			String[] pathList = dirItem.getPath().split("/");
+			String path = "/";
+	    	for(int i = 0; i<pathList.length-1; i++) {
+	    		path = path + pathList[i] + "/";
+	    	}
+			((FileSystemController) RootController.controllers.get("controller.FileSystemController")).refreshTreeView(path);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			Alert errorAlert = new Alert(AlertType.ERROR);
 			errorAlert.setTitle("error");
 			errorAlert.setHeaderText(null);

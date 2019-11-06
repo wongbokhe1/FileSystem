@@ -36,7 +36,6 @@ public class FileSystem implements FileSystemInterface{
 		
 		
 		DirItem file = new DirItem();
-		// TODO disk allocation 
 		file.setName(name);
 		file.setType(type);
 		file.setAttribute(attribute);
@@ -65,7 +64,6 @@ public class FileSystem implements FileSystemInterface{
 		this.checkName(name, parent);
 		
 		DirItem dir = new DirItem();
-		// TODO disk allocation
 		dir.setName(name);
 		dir.setAttribute(attribute);
 		dir.setPath(parent.getPath()+"/"+name);
@@ -149,6 +147,7 @@ public class FileSystem implements FileSystemInterface{
 		}
 		
 		if(buffer == null || buffer.length == 0) {
+			//TODO 保存空文件
 			return ;
 		}
 		
@@ -262,9 +261,9 @@ public class FileSystem implements FileSystemInterface{
 		
 		this.checkPath(item);
 		
-//		if(this.isOpen(item)) {
-//			throw new Exception("文件已打开");
-//		}
+		if(this.isOpen(item)) {
+			throw new Exception("文件已打开");
+		}
 		if((item.getAttribute() & DirItem.DIR) > 0 && Utility.countValidItem(this.getFileTree(item), this) > 0) {
 			throw new Exception("只能删除空目录");
 		}

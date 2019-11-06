@@ -35,9 +35,8 @@ public class Main extends Application{
 			Scene scene = new Scene(root);
 			Stage stage = new Stage();
 			stage.setScene(scene);
-			stage.setTitle("FileSystem");
+			stage.setTitle("InternalExplorer");
 			stage.getIcons().add(new Image("/view/filesystem_icon.png"));
-			//TODO add logo
 			RootController.controllers.get(controllerName).setStage(stage);
 			if(isShow) {
 				((FileSystemController)RootController.controllers.get(controllerName)).initCloseEventHandler();
@@ -45,7 +44,6 @@ public class Main extends Application{
 			}
 			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

@@ -85,11 +85,11 @@ public class NotepadTab extends Tab {
 		} catch (Exception e) {
 			Alert errorAlert = new Alert(AlertType.ERROR);
 			errorAlert.setTitle("Error");
-			errorAlert.setContentText("磁盘空间不足！");
+			errorAlert.setContentText(e.getMessage());
 			errorAlert.setHeaderText(null);
 			errorAlert.showAndWait();
 			return;
-
+//			e.printStackTrace();
 		}
 		
 	}

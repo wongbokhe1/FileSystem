@@ -1,15 +1,11 @@
 package controller;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Optional;
@@ -23,7 +19,6 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -31,10 +26,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Label;
-import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
@@ -43,12 +35,9 @@ import javafx.scene.control.TreeView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
-import jdk.nashorn.internal.ir.Flags;
 import model.DirItem;
 import model.Disk;
 import model.FAT;
@@ -293,7 +282,7 @@ public class FileSystemController extends RootController {
 								@Override
 								public void handle(ActionEvent event) {
 									super.handle(event);
-									// TODO modify attribute/name
+									// modify attribute/name
 									// 设置显示属性
 									boolean isFile = true;
 									if (dirItem.isDir()) {
@@ -483,7 +472,6 @@ public class FileSystemController extends RootController {
 			this.FATTable.add(stackPane, i / 64, i % 64);
 		}
 		for (int i = 3; i < Disk.totalBlock; i++) {
-			// TODO get true FAT
 //			Text diskBlock = new Text(String.valueOf(this.fileSystem.getFat().getLocation(i)));
 			Text diskBlock = new Text("0");
 			StackPane stackPane = new StackPane();
@@ -517,14 +505,6 @@ public class FileSystemController extends RootController {
 	@Override
 	public void setStage(Stage stage) {
 		this.stage = stage;
-
-		this.stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-
-			@Override
-			public void handle(WindowEvent event) {
-				Platform.exit(); // 退出程序
-			}
-		});
 	}
 
 	public FileSystem getFileSystem() {
@@ -552,7 +532,7 @@ public class FileSystemController extends RootController {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-
+				Platform.exit(); // 退出程序
 			}
 		});
 	}
