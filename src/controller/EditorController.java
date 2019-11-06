@@ -118,40 +118,42 @@ public class EditorController extends RootController {
 				this.fileNameTextField.setText(dirItem.getName());
 				return;
 			}
-			try {
-				this.dirItem.setType(getFileTypeTextField().getText());
-			} catch (Exception e) {
-				Alert errorAlert = new Alert(AlertType.ERROR);
-				errorAlert.setTitle("Error");
-				errorAlert.setContentText(e.getMessage());
-				errorAlert.setHeaderText(null);
-				errorAlert.showAndWait();
-				this.fileTypeTextField.setText(dirItem.getType());;
-				return;
-			}
-			byte attribute = 0;
-			if(readOnlyFileCheckBox.isSelected()) {
-				attribute += 1;
-			}
-			if(systemFileCheckBox.isSelected()) {
-				attribute += 2;
-			}
-			if(regularFileCheckBox.isSelected()) {
-				attribute += 4;
-			}
-			try {
-				this.dirItem.setAttribute(attribute);
-			} catch (Exception e) {
-				Alert errorAlert = new Alert(AlertType.ERROR);
-				errorAlert.setTitle("Error");
-				errorAlert.setContentText(e.getMessage());
-				errorAlert.setHeaderText(null);
-				errorAlert.showAndWait();
-				// 复原 check box
-				this.setRegularFileCheckBox(dirItem.isRegularFile());
-				this.setSystemFileCheckBox(dirItem.isSystemFile());
-				this.setReadOnlyFileCheckBox(dirItem.isReadOnlyFile());
-				return;
+			if(!this.dirItem.isDir()) {
+				try {
+					this.dirItem.setType(getFileTypeTextField().getText());
+				} catch (Exception e) {
+					Alert errorAlert = new Alert(AlertType.ERROR);
+					errorAlert.setTitle("Error");
+					errorAlert.setContentText(e.getMessage());
+					errorAlert.setHeaderText(null);
+					errorAlert.showAndWait();
+					this.fileTypeTextField.setText(dirItem.getType());;
+					return;
+				}
+				byte attribute = 0;
+				if(readOnlyFileCheckBox.isSelected()) {
+					attribute += 1;
+				}
+				if(systemFileCheckBox.isSelected()) {
+					attribute += 2;
+				}
+				if(regularFileCheckBox.isSelected()) {
+					attribute += 4;
+				}
+				try {
+					this.dirItem.setAttribute(attribute);
+				} catch (Exception e) {
+					Alert errorAlert = new Alert(AlertType.ERROR);
+					errorAlert.setTitle("Error");
+					errorAlert.setContentText(e.getMessage());
+					errorAlert.setHeaderText(null);
+					errorAlert.showAndWait();
+					// 复原 check box
+					this.setRegularFileCheckBox(dirItem.isRegularFile());
+					this.setSystemFileCheckBox(dirItem.isSystemFile());
+					this.setReadOnlyFileCheckBox(dirItem.isReadOnlyFile());
+					return;
+				}
 			}
 			
 			//修改目录项
@@ -174,6 +176,7 @@ public class EditorController extends RootController {
 			return;
 		}
 		((EditorController) RootController.controllers.get("controller.EditorController")).getStage().hide();
+		
 		// refresh
 		try {
 			String[] pathList = dirItem.getPath().split("/");
