@@ -3,13 +3,26 @@ package model;
 import java.util.List;
 
 public class Disk {
-	 private static byte[][] storageBlocks = new byte[128][];
+	public static final int totalBlock = 128;
+	public static final int blockSize = 64;
+	
+	private byte[][] storageBlocks = new byte[this.totalBlock][];
 	
 	public Disk() {
-		for (int i = 0; i < 128; i++) {
-            storageBlocks[i] = new byte[64];
+		for (int i = 0; i < this.totalBlock; i++) {
+            storageBlocks[i] = new byte[this.blockSize];
+            
         }
 	}
+	
+	public Disk(byte[] byteArray) {
+		this.storageBlocks = new byte[this.totalBlock][this.blockSize];
+		for(int i = 0; i<byteArray.length; i++) {
+			this.storageBlocks[i/64][i%64] = byteArray[i];
+		}
+	}
+	
+	// TODO load disk from file
 	
 	/**
      * 存储一个完整的块
@@ -37,6 +50,18 @@ public class Disk {
      */
     public byte[] getBlock(int index) {
         return storageBlocks[index];
+    }
+    
+    public byte[] getDiskArray() {
+    	byte[] array = new byte [this.totalBlock * this.blockSize];
+    	int i = 0;
+    	for (byte[] bs : this.storageBlocks) {
+			for (byte b : bs) {
+				array[i++] = b;
+			}
+		}
+		return array;
+    	
     }
     
     

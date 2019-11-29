@@ -1,0 +1,349 @@
+.main{
+	-fx-background-color: transparent;
+}
+
+/* 透明度, 弃用
+.scrollPane{
+	-fx-opacity: 0.9;
+	-fx-pref-width: 0;
+}
+* 
+*/
+
+/*去除边界 */
+.split-pane-divider{
+	-fx-font-size: 0.1;
+}
+
+.scroll-pane:focused, tree-view:focused{
+	-fx-border-color: transparent;
+	-fx-padding: 0;
+	-fx-background-insets: 0;
+}
+/*透明 */
+.scroll-bar{
+	-fx-background-color: transparent;
+}
+
+/*隐藏滚动条方向 */
+.scroll-bar .increment-arrow, .scroll-bar .decrement-arrow{
+	-fx-background-color: transparent;
+	-fx-shape:"";
+	-fx-padding:5;	
+}
+
+/*滚动条按钮默认透明 */
+.scroll-bar .decrement-button,
+.scroll-bar .increment-button {
+	-fx-background-color: transparent;
+} 
+
+/*悬浮时滚动条方向键显示 */
+.scroll-bar:horizontal .increment-arrow:hover {
+	-fx-background-color: -fx-mark-highlight-color, -fx-mark-color;
+    -fx-background-insets: 0 0 -1 0, 0;
+    -fx-padding: 0.25em;
+    -fx-shape: "M 0 -3.5 v 7 l 7 -3.5 z";
+}
+
+.scroll-bar:horizontal .decrement-arrow:hover {
+	-fx-background-color: -fx-mark-highlight-color, -fx-mark-color;
+    -fx-background-insets: 0 0 -1 0, 0;
+    -fx-padding: 0.25em;
+    -fx-shape: "M 0 -3.5 v 7 l -7 -3.5 z";
+}
+
+.scroll-bar:vertical .increment-arrow:hover {
+    -fx-background-color: -fx-mark-highlight-color, -fx-mark-color;
+    -fx-background-insets: 0 0 -1 0, 0;
+    -fx-padding: 0.25em;
+    -fx-shape: "M -3.5 0 h 7 l -3.5 7 z";
+}
+.scroll-bar:vertical .decrement-arrow:hover{
+    -fx-background-color: -fx-mark-highlight-color, -fx-mark-color;
+    -fx-background-insets: 0 0 -1 0, 0;
+    -fx-padding: 0.25em;
+    -fx-shape: "M -3.5 0 h 7 l -3.5 -7 z";
+}
+
+/*滚动条按钮按下时 */
+.scroll-bar .increment-arrow:pressed,
+.scroll-bar .decrement-arrow:pressed{
+	-fx-color: -fx-pressed-base;
+}
+
+.image-scroll-pane> .viewport{
+	-fx-background-color: #ffffff
+}
+
+
+/*压缩滚动条宽度 */
+.scroll-bar:vertical .thumb, 
+.scroll-bar:vertical .track {
+	-fx-background-insets: 0 0 0 13; /*上 右 下 左边界 */
+}
+
+.scroll-bar:horizontal .thumb,
+.scroll-bar:horizontal .track {
+	-fx-background-insets: 15 0 0 0;
+}
+
+/*滚动条颜色 */
+.scroll-bar .thumb {
+	-fx-opacity: 0.5;
+}
+
+.scroll-bar .thumb:hover ,.scroll-bar .thumb:pressed {
+	-fx-opacity: 1;
+}
+
+/*滚动条透明 */
+.scroll-bar .track {
+	-fx-background-color: transparent;
+}
+
+/*可拖动条不透明度 */
+.scroll-bar .thumb{
+	-fx-background-color: rgba(0,0,0,0.7);
+}
+
+/*悬浮时恢复滚动条宽度 */
+.scroll-bar .thumb:hover,
+.scroll-bar .track:hover {
+	-fx-background-insets: 0 0 0 0;
+}
+
+.scroll-bar .thumb:pressed,
+.scroll-bar .track:pressed {
+	-fx-background-insets: 0 0 0 0;
+}
+
+/*滚动面板右下角的小方块透明 */
+.scroll-pane .corner {
+	-fx-background-color: transparent;
+}
+
+/*可拖动条按下时的颜色 */
+.scroll-bar .thumb:pressed {
+	-fx-background-color: #202020;
+}
+
+
+
+/*文件列表的默认样式 */
+.tree-cell{
+	-fx-font-family: 'consolas';
+	-fx-font-size: 15;
+	-fx-font-weight: bold;
+	-fx-text-fill: #7d7d7d;
+}
+
+/*悬浮和被选择时的样式 */
+.tree-cell:hover{
+	-fx-background-color: linear-gradient(to right, #d4d4d4 0%, #d4d4d4 70%, white 98%);
+}
+
+.tree-cell:selected{
+	-fx-background-color: linear-gradient(to right, #7d7d7d 0%, #7d7d7d 70%, white 98%);
+	-fx-text-fill: #d6d6d6;
+}
+
+/*设置无项目的cell背景透明 */
+.tree-cell:empty{
+	-fx-background-color: transparent;
+}
+
+
+
+/*图片列表 */
+
+.imageList{
+	-fx-background-color: #ffffff;
+	-fx-background-insets: 0;
+}
+
+
+.imageList>.label:hover{
+	-fx-background-color: #ccfcfc;
+}
+
+.imageList>.label:focused {
+	-fx-background-color: rgba(0,245,245,0.3);
+	
+	-fx-border-color: rgba(0,190,190,0.7);
+	 -fx-border-image-width: 1.5
+	
+}
+
+
+
+/*图片按钮 */
+
+.rootButton{
+	-fx-background-color: transparent;
+}
+
+.rootButton:hover{
+	-fx-background-color: #e6e6e6;
+}
+
+.rootButton:pressed {
+	-fx-background-color: #c8c8c8;
+}
+
+
+.openButton {
+	-fx-graphic: url(./button/open.png);
+}
+
+.copyButton {
+	-fx-graphic: url(./button/copy.png);
+}
+
+.pasteButton {
+	-fx-graphic: url(./button/paste.png);
+}
+
+.editButton {
+
+	-fx-graphic: url(./button/edit.png); 
+}
+
+.deleteButton {
+
+	-fx-graphic: url(./button/delete.png); 
+}
+
+.slideButton {
+
+	-fx-graphic: url(./button/slide.png); 
+}
+
+
+.zoomInButton {
+	-fx-graphic: url(./button/zoom_in.png); 
+}
+
+.zoomOutButton {
+	-fx-graphic: url(./button/zoom_out.png); 
+}
+
+.deleteButton {
+	-fx-graphic: url(./button/delete.png); 
+}
+
+.rotateButton {
+	-fx-graphic: url(./button/rotate.png); 
+}
+
+.likeButton {
+	-fx-graphic: url(./button/like.png); 
+}
+
+.likedButton {
+	-fx-graphic: url(./button/liked.png);
+}
+
+.resetButton {
+	-fx-graphic: url(./button/reset.png); 
+}
+
+.detailsButton {
+	-fx-graphic: url(./button/details.png); 
+}
+
+/*viewer中上一张 下一张 按钮 */
+
+.previousButton, 
+.nextButton {
+	-fx-background-color: transparent;
+}
+
+.previousButton:hover {
+	-fx-background-color: linear-gradient(to right, rgba(220,220,220,0.9), rgba(220,220,220,0)); 
+}
+
+.nextButton:hover {
+	-fx-background-color: linear-gradient(to left, rgba(220,220,220,0.9), rgba(220,220,220,0))
+}
+
+.previousButton:pressed {
+	-fx-background-color: linear-gradient(to right, rgba(200,200,200,0.9), rgba(200,200,200,0)); 
+}
+
+.nextButton:pressed {
+	-fx-background-color: linear-gradient(to left, rgba(200,200,200,0.9), rgba(200,200,200,0))
+}
+
+
+/*纯文字按钮 */
+
+.textButton {
+	-fx-background-color: rgba(230, 230, 230, 0.7);
+	
+}
+
+.textButton:hover {
+	-fx-border-color: rgba(124,124,124,0.7);
+	-fx-border-width: 3
+}
+
+.textButton:pressed {
+	-fx-background-color: rgba(124,124,124,0.7);
+}
+
+
+/*幻灯片按钮 */
+
+.slideBottomBar {
+	-fx-background-color: transparent;
+}
+
+.slideBottomBar:hover {
+	-fx-background-color: linear-gradient(to top, #cccccc, rgba(238,238,238,0.5) 80%, rgba(255,255,255, 0));
+}
+
+
+.backButton {
+	-fx-background-color: transparent;
+	-fx-graphic: url(./button/back-icon.png);
+}
+
+.backButton:hover {
+	-fx-background-color: transparent;
+	-fx-graphic: url(./button/back-icon_hover.png);
+}
+
+.backButton:pressed {
+	-fx-background-color: transparent;
+	-fx-graphic: url(./button/back-icon_pressed.png);
+}
+
+.forwardButton {
+	-fx-background-color: transparent;
+	-fx-graphic: url(./button/forward-icon.png);
+}
+.forwardButton:hover {
+	-fx-background-color: transparent;
+	-fx-graphic: url(./button/forward-icon_hover.png);
+}
+
+.forwardButton:pressed {
+	-fx-background-color: transparent;
+	-fx-graphic: url(./button/forward-icon_pressed.png);
+}
+
+.upButton {
+	-fx-background-color: transparent;
+	-fx-graphic: url(./button/up-icon.png);
+}
+
+.upButton:hover {
+	-fx-background-color: transparent;
+	-fx-graphic: url(./button/up-icon_hover.png);
+}
+
+.upButton:pressed {
+	-fx-background-color: transparent;
+	-fx-graphic: url(./button/up-icon_pressed.png);
+}
